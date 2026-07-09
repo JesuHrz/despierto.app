@@ -1,10 +1,10 @@
 # Despierto
 
-Evita que tu laptop bloquee la pantalla o entre en reposo mientras la pestaña está abierta. App web de **un solo archivo por tipo** (HTML/CSS/JS), sin build ni dependencias, vanilla.
+Evita que tu computadora bloquee la pantalla o entre en reposo mientras la pestaña está abierta. App web de **un solo archivo por tipo** (HTML/CSS/JS), sin build ni dependencias, vanilla.
 
 ## Propósito
 
-Muchas laptops bloquean la pantalla a los ~15 min de inactividad. El viejo truco de dejar un video de YouTube en mute falla: al mutear, el navegador quita el estado "audible" del tab y libera el power-assertion que evitaba el sleep.
+Muchas computadoras bloquean la pantalla a los ~15 min de inactividad. El viejo truco de dejar un video de YouTube en mute falla: al mutear, el navegador quita el estado "audible" del tab y libera el power-assertion que evitaba el sleep.
 
 Despierto lo resuelve de forma nativa y confiable, combinando dos mecanismos complementarios.
 
@@ -45,12 +45,19 @@ Mientras el tab está oculto/minimizado, el Wake Lock real no aplica (límite de
 
 ## Desarrollo
 
-No hay build. Serví la carpeta con cualquier server estático:
+No hay build. Serví la carpeta con un server estático del ecosistema JS:
 
 ```bash
-python3 -m http.server 8000
-# abrí http://localhost:8000
+# live-server: recarga automática al guardar (recomendado para desarrollo)
+npx live-server
+
+# alternativa estática simple, sin recarga
+npx serve .
 ```
+
+`npx` los ejecuta sin instalar nada en el proyecto (mantiene el zero-deps). Abrí la URL que imprime (típico `http://localhost:8080`).
+
+Sin Node a mano, cualquier server estático sirve, ej. `python3 -m http.server 8000`.
 
 ## Estructura
 

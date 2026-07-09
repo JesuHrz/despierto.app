@@ -1,0 +1,14 @@
+{
+  "name": "despierto",
+  "version": "1.0.0",
+  "description": "Evita que tu computadora bloquee la pantalla usando la Wake Lock API nativa del navegador.",
+  "author": "Jesús Hernández <jesusbeckan@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "live-server"
+  },
+  "devDependencies": {
+    "live-server": "1.2.2"
+  }
+}

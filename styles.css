@@ -1,10 +1,3 @@
-/* Tema: paleta neutra basada en jesuhrz.com; el verde (--accent-on) es semántico de Despierto.
-   Estrategia de 3 estados:
-     - sin [data-theme]  -> sigue el sistema (media query de abajo)
-     - [data-theme=light]-> fuerza claro
-     - [data-theme=dark] -> fuerza oscuro
-   El toggle escribe data-theme en <html> y lo persiste; un script inline en <head> lo
-   aplica antes del primer paint para evitar el flash de tema incorrecto. */
 :root {
   color-scheme: light dark;
   --bg: #f4f5f7;
@@ -17,12 +10,14 @@
   --accent-on: #16a34a;
   --accent-auto: #2277ff;
   --shadow-sm: 0 2px 10px rgba(17, 24, 39, 0.07);
-  --shadow: 0 10px 34px rgba(17, 24, 39, 0.10);
+  --shadow: 0 10px 34px rgba(17, 24, 39, 0.1);
 }
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #0d0d17;
+    --bg-2: #09090f;
     --fg: #ffffff;
     --card: #18181b;
     --card-rgb: 24, 24, 27;
@@ -30,8 +25,11 @@
     --accent-off: #9ca3af;
     --accent-on: #22c55e;
     --accent-auto: #4b9bff;
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
   }
 }
+
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0d0d17;
@@ -46,27 +44,35 @@
   --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
   --shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
 }
-* { box-sizing: border-box; }
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Gradiente sutil en vez de color plano: da profundidad y suaviza el light mode */
   background: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
   color: var(--fg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-/* Transición suave al alternar tema (evita el "salto" brusco al cambiar) */
+
 body,
 .card,
 .tabs,
 .theme-toggle,
 .history-clear,
 .history-feed__item {
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
 }
+
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -77,21 +83,41 @@ body,
   width: 90%;
   box-shadow: var(--shadow);
 }
+
+@media (max-width: 640px) {
+  body {
+    align-items: flex-start;
+  }
+
+  .card {
+    max-width: none;
+    width: 100%;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 7rem 1.5rem 2rem;
+  }
+}
+
 h1 {
   font-size: 1.4rem;
   margin: 0 0 0.25rem;
 }
+
 .card__subtitle {
   color: var(--accent-off);
   font-size: 0.9rem;
   margin: 0 0 1.75rem;
 }
+
 .card__dot-wrap {
   position: relative;
   width: 14px;
   height: 14px;
   margin: 0 auto 1.75rem;
 }
+
 .card__dot {
   position: absolute;
   inset: 0;
@@ -101,30 +127,36 @@ h1 {
   background: var(--accent-off);
   transition: background 0.2s;
 }
+
 .card__dot.is-on {
   background: var(--accent-on);
 }
+
 .card__dot-wrap::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: var(--accent-on);
   opacity: 0;
 }
+
 .card__dot-wrap.is-on::after {
   animation: ping 1.5s ease-out infinite;
 }
+
 @keyframes ping {
   0% {
     transform: scale(1);
     opacity: 0.6;
   }
+
   100% {
     transform: scale(2.8);
     opacity: 0;
   }
 }
+
 button {
   width: 100%;
   padding: 0.85rem;
@@ -137,19 +169,29 @@ button {
   color: var(--bg);
   transition: opacity 0.15s;
 }
-button:hover { opacity: 0.85; }
-button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+button:hover {
+  opacity: 0.85;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--accent-auto);
   outline-offset: 2px;
 }
+
 .card__status {
   margin-top: 1rem;
   font-size: 0.85rem;
   color: var(--accent-off);
   min-height: 1.2em;
 }
+
 .card__timer {
   font-variant-numeric: tabular-nums;
   font-size: 2rem;
@@ -157,9 +199,11 @@ input:focus-visible {
   margin: 0 0 1rem;
   color: var(--accent-off);
 }
+
 .card__timer.is-on {
   color: var(--fg);
 }
+
 .card__remaining {
   font-variant-numeric: tabular-nums;
   font-size: 0.8rem;
@@ -167,6 +211,7 @@ input:focus-visible {
   min-height: 1.2em;
   margin-bottom: 0.5rem;
 }
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -178,6 +223,7 @@ input:focus-visible {
   white-space: nowrap;
   border: 0;
 }
+
 .tabs {
   display: flex;
   gap: 0.3rem;
@@ -187,6 +233,7 @@ input:focus-visible {
   padding: 0.25rem;
   margin-bottom: 1.25rem;
 }
+
 .tabs__btn {
   flex: 1;
   width: auto;
@@ -197,35 +244,42 @@ input:focus-visible {
   color: var(--accent-off);
   border-radius: 7px;
 }
-.tabs__btn:hover { opacity: 1; background: var(--border); }
+
+.tabs__btn:hover {
+  opacity: 1;
+  background: var(--border);
+}
+
 .tabs__btn.is-active {
   background: var(--card);
   color: var(--fg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
+
 fieldset.duration-picker {
   margin: 0 0 1.25rem;
   padding: 0;
   border: none;
   text-align: left;
-  /* Layout en columna con ritmo uniforme: evita el look "todo pegado" */
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
 }
-/* Sin esto, el `display: flex` de arriba anula el atributo [hidden] y el panel
-   quedaría visible en modo Cronómetro (rompe el cambio de tabs). */
+
 fieldset.duration-picker[hidden] {
   display: none;
 }
+
 .duration-picker.is-disabled {
   opacity: 0.45;
   pointer-events: none;
 }
+
 .duration-picker__presets {
   display: flex;
   gap: 0.5rem;
 }
+
 .duration-picker__btn {
   width: auto;
   flex: 1;
@@ -237,13 +291,18 @@ fieldset.duration-picker[hidden] {
   color: var(--fg);
   border-radius: 8px;
 }
-.duration-picker__btn:hover { opacity: 1; background: var(--border); }
+
+.duration-picker__btn:hover {
+  opacity: 1;
+  background: var(--border);
+}
+
 .duration-picker__btn.is-active {
   background: var(--accent-on);
   border-color: var(--accent-on);
   color: #fff;
 }
-/* Separador "o manual" con líneas a los costados */
+
 .duration-picker__divider {
   display: flex;
   align-items: center;
@@ -253,24 +312,28 @@ fieldset.duration-picker[hidden] {
   letter-spacing: 0.06em;
   color: var(--accent-off);
 }
+
 .duration-picker__divider::before,
 .duration-picker__divider::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: var(--border);
 }
+
 .duration-picker__field {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
 }
+
 .duration-picker__custom-label {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--fg);
   margin: 0;
 }
+
 .duration-picker__custom-input {
   width: 100%;
   padding: 0.65rem 0.75rem;
@@ -281,12 +344,14 @@ fieldset.duration-picker[hidden] {
   color: var(--fg);
   margin: 0;
 }
+
 .duration-picker__hint {
   font-size: 0.72rem;
   color: var(--accent-off);
   margin: 0;
   line-height: 1.5;
 }
+
 .duration-picker__selected {
   font-size: 0.8rem;
   font-weight: 600;
@@ -299,7 +364,6 @@ fieldset.duration-picker[hidden] {
   text-align: center;
 }
 
-/* Historial tipo overlay de chat de streaming: fijo a la derecha, transparente, siempre visible */
 .history-feed {
   position: fixed;
   top: 3.75rem;
@@ -312,9 +376,11 @@ fieldset.duration-picker[hidden] {
   overflow-y: auto;
   padding: 0.5rem;
 }
-.history-feed::-webkit-scrollbar { width: 4px; }
 
-/* Toggle de tema: botón-icono fijo arriba-izquierda */
+.history-feed::-webkit-scrollbar {
+  width: 4px;
+}
+
 .theme-toggle {
   position: fixed;
   top: 1rem;
@@ -333,19 +399,50 @@ fieldset.duration-picker[hidden] {
   border-radius: 8px;
   box-shadow: var(--shadow-sm);
 }
-.theme-toggle:hover { opacity: 1; background: rgba(var(--card-rgb), 0.85); }
-.theme-toggle svg { width: 18px; height: 18px; display: block; }
-/* Ícono según el tema EFECTIVO (sistema o forzado), sin depender de JS */
-.theme-toggle__moon { display: none; }
-.theme-toggle__sun { display: block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .theme-toggle__sun { display: none; }
-  :root:not([data-theme="light"]) .theme-toggle__moon { display: block; }
+
+.theme-toggle:hover {
+  opacity: 1;
+  background: rgba(var(--card-rgb), 0.85);
 }
-:root[data-theme="dark"] .theme-toggle__sun { display: none; }
-:root[data-theme="dark"] .theme-toggle__moon { display: block; }
-:root[data-theme="light"] .theme-toggle__sun { display: block; }
-:root[data-theme="light"] .theme-toggle__moon { display: none; }
+
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-toggle__moon {
+  display: none;
+}
+
+.theme-toggle__sun {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle__sun {
+    display: none;
+  }
+
+  :root:not([data-theme="light"]) .theme-toggle__moon {
+    display: block;
+  }
+}
+
+:root[data-theme="dark"] .theme-toggle__sun {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle__moon {
+  display: block;
+}
+
+:root[data-theme="light"] .theme-toggle__sun {
+  display: block;
+}
+
+:root[data-theme="light"] .theme-toggle__moon {
+  display: none;
+}
 
 .history-clear {
   position: fixed;
@@ -364,10 +461,18 @@ fieldset.duration-picker[hidden] {
   border-radius: 8px;
   box-shadow: var(--shadow-sm);
 }
-.history-clear:hover { opacity: 1; color: var(--fg); }
-@media (max-width: 860px) {
-  .history-clear { display: none; }
+
+.history-clear:hover {
+  opacity: 1;
+  color: var(--fg);
 }
+
+@media (max-width: 860px) {
+  .history-clear {
+    display: none;
+  }
+}
+
 .history-feed__list {
   list-style: none;
   margin: 0;
@@ -376,6 +481,7 @@ fieldset.duration-picker[hidden] {
   flex-direction: column;
   gap: 0.6rem;
 }
+
 .history-feed__item {
   position: relative;
   pointer-events: auto;
@@ -388,9 +494,9 @@ fieldset.duration-picker[hidden] {
   overflow: hidden;
   animation: chatIn 0.3s ease;
 }
-/* Barra izquierda con gradiente (verde->teal cronómetro, azul->cyan temporizador) */
+
 .history-feed__item::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -398,34 +504,48 @@ fieldset.duration-picker[hidden] {
   width: 3px;
   background: linear-gradient(180deg, var(--accent-on), #0d9488);
 }
+
 .history-feed__item--timer::before {
   background: linear-gradient(180deg, var(--accent-auto), #22d3ee);
 }
+
 @keyframes chatIn {
-  from { opacity: 0; transform: translateX(14px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
+
 .history-feed__row {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
   margin-bottom: 0.15rem;
 }
+
 .history-feed__seq {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   font-size: 0.72rem;
   color: var(--accent-off);
 }
+
 .history-feed__date {
   color: var(--accent-off);
   font-size: 0.8rem;
 }
+
 .history-feed__duration {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   font-size: 1rem;
 }
+
 .history-feed__reason {
   display: inline-block;
   margin-top: 0.25rem;
@@ -433,11 +553,13 @@ fieldset.duration-picker[hidden] {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--accent-on); /* cronómetro = verde (default) */
+  color: var(--accent-on);
 }
+
 .history-feed__item--timer .history-feed__reason {
-  color: var(--accent-auto); /* temporizador = azul */
+  color: var(--accent-auto);
 }
+
 .history-feed__empty {
   pointer-events: none;
   color: var(--accent-off);
@@ -445,6 +567,9 @@ fieldset.duration-picker[hidden] {
   text-align: right;
   margin: 0 0.5rem;
 }
+
 @media (max-width: 860px) {
-  .history-feed { display: none; }
+  .history-feed {
+    display: none;
+  }
 }

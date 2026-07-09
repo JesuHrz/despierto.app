@@ -1,7 +1,7 @@
 # Config de Netlify para Despierto — sitio estático, sin build.
 
 [build]
-  publish = "."
+  publish = "src"
 
 # ---------- Redirects ----------
 # /index.html -> / (URL limpia). force = true equivale al "!" de _redirects.

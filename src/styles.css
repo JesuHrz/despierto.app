@@ -381,11 +381,16 @@ fieldset.duration-picker[hidden] {
   width: 4px;
 }
 
-.theme-toggle {
+.top-controls {
   position: fixed;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.theme-toggle {
   width: 2.4rem;
   height: 2.4rem;
   padding: 0;
@@ -445,32 +450,23 @@ fieldset.duration-picker[hidden] {
 }
 
 .history-clear {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
+  align-self: flex-end;
+  flex-shrink: 0;
   width: auto;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
+  padding: 0;
+  font-size: 0.8rem;
   font-weight: 600;
-  background: rgba(var(--card-rgb), 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: transparent;
   color: var(--accent-off);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  border-radius: 0;
 }
 
 .history-clear:hover {
   opacity: 1;
   color: var(--fg);
-}
-
-@media (max-width: 860px) {
-  .history-clear {
-    display: none;
-  }
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .history-feed__list {
@@ -578,30 +574,33 @@ fieldset.duration-picker[hidden] {
   display: none;
 }
 
+.history-link[hidden] {
+  display: none;
+}
+
 .history-link:hover {
   opacity: 1;
-  background: rgba(var(--card-rgb), 0.85);
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 860px) {
   .history-link {
     display: inline-block;
     position: fixed;
-    top: 1rem;
+    top: 4.5rem;
     right: 1rem;
     z-index: 10;
     width: auto;
     margin: 0;
-    padding: 0.5rem 0.9rem;
+    padding: 0;
     font-size: 0.8rem;
     font-weight: 600;
-    background: rgba(var(--card-rgb), 0.55);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: var(--fg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: var(--shadow-sm);
+    background: transparent;
+    color: var(--accent-off);
+    border: none;
+    border-radius: 0;
   }
 }
 
@@ -663,18 +662,20 @@ fieldset.duration-picker[hidden] {
 .history-modal__clear {
   align-self: flex-end;
   width: auto;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
+  padding: 0;
+  font-size: 0.8rem;
   font-weight: 600;
   background: transparent;
   color: var(--accent-off);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: none;
+  border-radius: 0;
 }
 
 .history-modal__clear:hover {
   opacity: 1;
   color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .history-modal .history-feed__empty {
@@ -706,4 +707,107 @@ fieldset.duration-picker[hidden] {
 
 .footer__link:hover {
   text-decoration: underline;
+}
+
+.pip-toggle {
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+  background: rgba(var(--card-rgb), 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pip-toggle[hidden] {
+  display: none;
+}
+
+.pip-toggle:hover {
+  opacity: 1;
+  background: rgba(var(--card-rgb), 0.85);
+}
+
+.pip-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 1rem 1.25rem;
+  text-align: center;
+}
+
+.pip[hidden] {
+  display: none;
+}
+
+.pip__dot-wrap {
+  position: relative;
+  width: 12px;
+  height: 12px;
+}
+
+.pip__dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--accent-on);
+}
+
+.pip__dot-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--accent-on);
+  animation: ping 1.5s ease-out infinite;
+}
+
+.pip__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-off);
+}
+
+.pip__time {
+  font-variant-numeric: tabular-nums;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.pip__meta {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-auto);
+}
+
+.pip__stop {
+  width: auto;
+  margin-top: 0.25rem;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--fg);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pip__stop:hover {
+  opacity: 0.85;
 }

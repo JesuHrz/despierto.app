@@ -1,81 +1,83 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Despierto — Mantén la pantalla de tu computadora despierta</title>
-<meta name="description" content="Despierto evita que tu computadora bloquee la pantalla o entre en reposo. Usa la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático. Sin instalar nada.">
-<meta name="keywords" content="wake lock, mantener pantalla encendida, evitar bloqueo de pantalla, no dormir pantalla, keep screen awake, caffeine web">
-<meta name="robots" content="index, follow">
-<meta name="author" content="Jesús Hernández">
-<link rel="author" href="https://jesuhrz.com">
-<link rel="canonical" href="https://despierto.app/">
+  <title>Despierto — Mantén la pantalla de tu computadora despierta</title>
+  <meta name="description" content="Despierto evita que tu computadora bloquee la pantalla o entre en reposo. Usa la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático. Sin instalar nada.">
+  <meta name="keywords" content="wake lock, mantener pantalla encendida, evitar bloqueo de pantalla, no dormir pantalla, keep screen awake, caffeine web">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Jesús Hernández">
+  <link rel="author" href="https://jesuhrz.com">
+  <link rel="canonical" href="https://despierto.app/">
 
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Despierto">
-<meta property="og:title" content="Despierto — Mantén la pantalla de tu computadora despierta">
-<meta property="og:description" content="Evita que tu computadora bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador de apagado automático. Sin instalar nada.">
-<meta property="og:url" content="https://despierto.app/">
-<meta property="og:image" content="https://despierto.app/og-image.svg">
-<meta property="og:locale" content="es_ES">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Despierto">
+  <meta property="og:title" content="Despierto — Mantén la pantalla de tu computadora despierta">
+  <meta property="og:description" content="Evita que tu computadora bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador de apagado automático. Sin instalar nada.">
+  <meta property="og:url" content="https://despierto.app/">
+  <meta property="og:image" content="https://despierto.app/og-image.svg">
+  <meta property="og:locale" content="es_ES">
 
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Despierto — Mantén la pantalla despierta">
-<meta name="twitter:description" content="Evita que tu computadora bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador. Sin instalar nada.">
-<meta name="twitter:image" content="https://despierto.app/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Despierto — Mantén la pantalla despierta">
+  <meta name="twitter:description" content="Evita que tu computadora bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador. Sin instalar nada.">
+  <meta name="twitter:image" content="https://despierto.app/og-image.svg">
 
-<!-- PWA / iconos -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Despierto">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="/icon.svg">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" class="js-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%238b8b8f'/%3E%3C/svg%3E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Despierto">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" class="js-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%238b8b8f'/%3E%3C/svg%3E">
 
-<!-- Aplica el tema guardado ANTES del primer paint para evitar el flash de tema incorrecto -->
-<script>
-  try {
-    var t = localStorage.getItem('__@despierto.theme__');
-    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-  } catch (e) {}
-</script>
+  <script>
+    try {
+      var t = localStorage.getItem('__@despierto.theme__');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
 
-<link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css">
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Despierto",
-  "url": "https://despierto.app/",
-  "description": "Evita que tu computadora bloquee la pantalla o entre en reposo usando la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático.",
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Cualquiera con navegador compatible con la Wake Lock API",
-  "browserRequirements": "Requiere JavaScript y la Screen Wake Lock API",
-  "inLanguage": "es",
-  "isAccessibleForFree": true,
-  "author": {
-    "@type": "Person",
-    "name": "Jesús Hernández",
-    "url": "https://jesuhrz.com"
-  },
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-}
-</script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Despierto",
+    "url": "https://despierto.app/",
+    "description": "Evita que tu computadora bloquee la pantalla o entre en reposo usando la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Cualquiera con navegador compatible con la Wake Lock API",
+    "browserRequirements": "Requiere JavaScript y la Screen Wake Lock API",
+    "inLanguage": "es",
+    "isAccessibleForFree": true,
+    "author": {
+      "@type": "Person",
+      "name": "Jesús Hernández",
+      "url": "https://jesuhrz.com"
+    },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
 </head>
 <body>
-  <button type="button" class="theme-toggle js-theme-toggle" aria-label="Cambiar tema">
-    <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  </button>
+  <div class="top-controls">
+    <button type="button" class="pip-toggle js-pip-open" aria-label="Abrir ventana flotante" aria-pressed="false" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="11" y="11" width="8" height="5" rx="1" fill="currentColor"/></svg>
+    </button>
+    <button type="button" class="theme-toggle js-theme-toggle" aria-label="Cambiar tema">
+      <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+
   <main class="card">
     <div class="card__dot-wrap js-status-dot-wrap" aria-hidden="true"><div class="card__dot js-status-dot"></div></div>
     <h1>Despierto</h1>
@@ -109,11 +111,11 @@
 
     <button class="card__toggle js-toggle-button" aria-pressed="false">Activar</button>
     <p class="card__status js-status-message" role="status" aria-live="polite"></p>
-    <button type="button" class="history-link js-history-open" aria-haspopup="dialog">Ver historial</button>
+    <button type="button" class="history-link js-history-open" aria-haspopup="dialog" hidden>Ver historial</button>
   </main>
 
-  <button type="button" class="history-clear js-history-clear" hidden>Borrar historial</button>
   <aside class="history-feed" aria-label="Historial de activaciones">
+    <button type="button" class="history-clear js-history-clear" hidden>Borrar historial</button>
     <p class="history-feed__empty js-history-empty">Sin actividad aún</p>
     <ul class="history-feed__list js-history-list"></ul>
   </aside>
@@ -134,6 +136,14 @@
     Hecho con <span class="footer__heart" aria-hidden="true">&hearts;</span> por
     <a class="footer__link" href="https://jesuhrz.com" target="_blank" rel="noopener">jesuhrz</a>
   </footer>
+
+  <div class="pip js-pip-widget" hidden>
+    <div class="pip__dot-wrap"><div class="pip__dot"></div></div>
+    <div class="pip__label js-pip-label">Cronómetro</div>
+    <div class="pip__time js-pip-time">00:00:00</div>
+    <div class="pip__meta js-pip-meta" hidden></div>
+    <button type="button" class="pip__stop js-pip-stop">Desactivar</button>
+  </div>
 
   <script type="module" src="script.js"></script>
 </body>

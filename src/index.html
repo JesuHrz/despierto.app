@@ -81,6 +81,12 @@
   </script>
 </head>
 <body>
+  <div class="alert js-pip-alert" role="alert" hidden>
+    <span class="alert__icon" aria-hidden="true">&#9888;</span>
+    <p class="alert__text">Sin la ventana flotante, la pantalla puede bloquearse si te vas a otra pestaña.</p>
+    <button type="button" class="alert__action js-pip-reopen">Abrirla de nuevo</button>
+  </div>
+
   <div class="top-controls">
     <button type="button" class="top-controls__btn pip-toggle js-pip-open" aria-label="Abrir ventana flotante" aria-pressed="false" title="Necesita una sesión activa" disabled>
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="11" y="11" width="8" height="5" rx="1" fill="currentColor"/></svg>
@@ -127,6 +133,7 @@
 
     <button class="card__toggle js-toggle-button" aria-pressed="false">Activar</button>
     <p class="card__status js-status-message" role="status" aria-live="polite"></p>
+
     <button type="button" class="history-link js-history-open" aria-haspopup="dialog" hidden>Ver historial</button>
   </main>
 
@@ -227,7 +234,7 @@
       </section>
 
       <section class="guide__section">
-        <h3 class="guide__section-title">Por qué aparece la ventana flotante sola</h3>
+        <h3 class="guide__section-title">Por qué aparece la ventana flotante</h3>
         <ul class="guide__list">
           <li class="guide__item">
             <span class="guide__icon" aria-hidden="true">
@@ -235,7 +242,7 @@
             </span>
             <span>
               <span class="guide__term">Mientras estás en la pestaña</span>
-              <p class="guide__desc">El navegador mantiene la pantalla despierta y no hace falta nada más.</p>
+              <p class="guide__desc">El navegador mantiene la pantalla despierta por su cuenta y no hace falta nada más.</p>
             </span>
           </li>
           <li class="guide__item">
@@ -243,8 +250,8 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h8v12H3z"/><path d="M14 9l4 3-4 3"/><path d="M21 6v12"/></svg>
             </span>
             <span>
-              <span class="guide__term">Cuando te cambiás de pestaña</span>
-              <p class="guide__desc">El navegador suelta ese permiso por seguridad. La ventana flotante se abre sola para tomar su lugar, y se cierra cuando volvés.</p>
+              <span class="guide__term">Cuando te vas a otra pestaña o escritorio</span>
+              <p class="guide__desc">El navegador suelta ese permiso por seguridad, y la única que sigue sosteniendo la pantalla es la ventana flotante. Por eso se abre al activar y se queda: el navegador no nos deja abrirla más tarde, cuando ya no estás mirando.</p>
             </span>
           </li>
         </ul>
@@ -253,7 +260,7 @@
       <p class="guide__note">
         <span aria-hidden="true">⚠️</span>
         <span>
-          Si <b>cerrás la ventana flotante</b> y te vas a otra pestaña, la pantalla puede bloquearse. Cerrar la tapa o suspender el equipo a mano siempre gana: eso ninguna web lo evita.
+          Si <b>cerrás la ventana flotante</b> y te vas a otra pestaña, la pantalla puede bloquearse. Volvé a abrirla con el botón de ventana flotante. Cerrar la tapa o suspender el equipo a mano siempre gana: eso ninguna web lo evita.
         </span>
       </p>
     </div>
@@ -263,6 +270,18 @@
     Hecho con <span class="footer__heart" aria-hidden="true">&hearts;</span> por
     <a class="footer__link" href="https://jesuhrz.com" target="_blank" rel="noopener">jesuhrz</a>
   </footer>
+
+  <div class="overlay js-pip-overlay" hidden>
+    <div class="overlay__box">
+      <div class="overlay__dot-wrap" aria-hidden="true"><div class="overlay__dot"></div></div>
+      <p class="overlay__title">Corriendo en la ventana flotante</p>
+      <p class="overlay__text">Podés cambiar de pestaña o de escritorio: la pantalla no se va a bloquear.</p>
+      <div class="overlay__actions">
+        <button type="button" class="overlay__action js-pip-close">Volver a esta pestaña</button>
+        <button type="button" class="overlay__action overlay__action--ghost js-pip-stop">Desactivar</button>
+      </div>
+    </div>
+  </div>
 
   <div class="pip-stage" aria-hidden="true">
     <canvas class="js-pip-canvas" width="480" height="270"></canvas>

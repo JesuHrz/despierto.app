@@ -26,9 +26,11 @@ Despierto hace lo mismo que ese video, pero deliberadamente y sin depender de na
 - **Wake Lock API**: método correcto y eficiente, pero el spec lo libera al ocultar el tab. Solo cubre primer plano.
 - **Video en PiP**: Chromium sostiene una assertion de *display sleep* mientras hay un `<video>` reproduciéndose y visible, o en Picture-in-Picture. Como la ventana de PiP es independiente del tab, la assertion sobrevive aunque cambies de pestaña o de app. Es el mismo mecanismo por el que Google Meet mantiene la pantalla viva.
 
-Mientras el tab está visible alcanza con el Wake Lock, así que la ventana flotante no aparece y no estorba. **Se abre sola en cuanto el tab se oculta**, que es justo cuando el Wake Lock muere, y se cierra sola al volver. Si la abrís a mano con el botón, se queda.
+**La ventana flotante se abre con el click de "Activar" y queda abierta toda la sesión.** No es una decisión estética: Chrome solo permite `requestPictureInPicture()` mientras se está procesando un gesto del usuario, salvo que ya haya algo en PiP. Para cuando el tab se oculta no queda ningún gesto, así que abrirla ahí falla con `NotAllowedError`.
 
-Si la cerrás y te vas a otra pestaña, no queda nada sosteniendo la pantalla (la app te lo avisa en el estado).
+Si la cerrás a mano y te vas a otra pestaña, no queda nada sosteniendo la pantalla (la app te lo avisa en el estado). Para reabrirla, el botón de PiP — ese click sí es un gesto.
+
+> El único modo de que la ventana aparezca sola *solo cuando te vas* es el auto-PiP del navegador, que Chrome reserva para PWAs instaladas.
 
 ### Por qué no usamos audio
 
@@ -46,7 +48,7 @@ Un tono inaudible (`OscillatorNode` con ganancia `0.0001`) parece una solución 
     - `1.30` / `.15` (2 decimales) = minutos literales → 1h 30min / 15min
 - **Historial** de sesiones (localStorage): duración con milisegundos, numeración, y etiqueta de modo (cronómetro / temporizador). Con botón para borrar.
 - **Tema claro/oscuro** con toggle persistente (sin flash al cargar) y detección del sistema.
-- **Ventana flotante** (Picture-in-Picture): mini-widget always-on-top con el estado de la sesión. Se abre sola al ocultar el tab y es lo que mantiene la pantalla despierta en segundo plano (Chromium).
+- **Ventana flotante** (Picture-in-Picture): mini-widget always-on-top con el estado de la sesión. Se abre al activar y es lo que mantiene la pantalla despierta en segundo plano (Chromium).
 - **Guía de uso** en un `<dialog>` nativo, desde el icono de información.
 - **Favicon dinámico** (gris apagado / verde activo) y punto con animación tipo radar.
 - Accesible (roles ARIA, `aria-live`, navegación por teclado) y con metadata SEO + JSON-LD.

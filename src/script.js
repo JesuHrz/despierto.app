@@ -34,8 +34,13 @@ const pipSupported = document.pictureInPictureEnabled === true;
 const pipOpenBtn = document.querySelector(".js-pip-open");
 const pipCanvas = document.querySelector(".js-pip-canvas");
 const pipVideo = document.querySelector(".js-pip-video");
+const pipOverlay = document.querySelector(".js-pip-overlay");
+const pipCloseBtn = document.querySelector(".js-pip-close");
+const pipStopBtn = document.querySelector(".js-pip-stop");
+const pipAlert = document.querySelector(".js-pip-alert");
+const pipReopenBtn = document.querySelector(".js-pip-reopen");
 let pipStream = null;
-let pipAutoOpened = false;
+let pipSettled = false;
 
 const HISTORY_KEY = "__@despierto-store.history__";
 const THEME_KEY = "__@despierto.theme__";
@@ -343,6 +348,7 @@ function setUI(active, msg) {
     : "Necesita una sesión activa";
   setMediaSession(active);
   if (!active) stopPipVideo();
+  syncPipUi();
 }
 
 function cssVar(name, fallback) {
@@ -408,7 +414,7 @@ async function startPipVideo() {
 }
 
 function stopPipVideo() {
-  pipAutoOpened = false;
+  pipSettled = false;
 
   if (document.pictureInPictureElement) {
     document.exitPictureInPicture().catch(() => {})
@@ -422,6 +428,10 @@ function stopPipVideo() {
   pipStream = null;
 }
 
+// Chrome only allows requestPictureInPicture() while a user gesture is being
+// handled, unless something is already in PiP. There is no gesture left by the
+// time the tab hides, so the window has to be opened from the activate click
+// and kept open for the whole session.
 async function openPip(source) {
   if (!pipSupported || !userActive || document.pictureInPictureElement) return;
 
@@ -430,7 +440,12 @@ async function openPip(source) {
   try {
     await pipVideo.requestPictureInPicture();
     track("pip_open", { mode: activeTab, source: source || "auto" });
-  } catch (err) {}
+  } catch (err) {
+    status.textContent = "No se pudo abrir la ventana flotante";
+  }
+
+  pipSettled = true;
+  syncPipUi();
 }
 
 function closePip() {
@@ -445,20 +460,36 @@ function togglePip() {
     return;
   }
 
-  // Opened by hand: keep it around when the tab comes back into view.
-  pipAutoOpened = false;
   openPip("button");
 }
 
+// The PiP window already shows the timer, so the card behind it is redundant:
+// cover it while PiP is up, and warn when the only background cover is gone.
+function syncPipUi() {
+  const inPip = Boolean(document.pictureInPictureElement);
+  pipOpenBtn.setAttribute("aria-pressed", String(inPip));
+  pipOverlay.hidden = !(userActive && inPip);
+  pipAlert.hidden = !(userActive && pipSettled && pipSupported && !inPip);
+  document.body.classList.toggle("has-alert", !pipAlert.hidden);
+  syncAlertHeight();
+}
+
+// The banner wraps to two or three lines on narrow screens, so whatever sits
+// below it has to be pushed down by its real height, not a guessed one.
+function syncAlertHeight() {
+  const height = pipAlert.hidden ? 0 : pipAlert.offsetHeight;
+  document.body.style.setProperty("--alert-h", `${height}px`);
+}
+
+new ResizeObserver(syncAlertHeight).observe(pipAlert);
+
 pipOpenBtn.addEventListener("click", togglePip);
+pipCloseBtn.addEventListener("click", closePip);
+pipStopBtn.addEventListener("click", () => stopSession("manual"));
+pipReopenBtn.addEventListener("click", () => openPip("alert"));
 
-pipVideo.addEventListener("enterpictureinpicture", () =>
-  pipOpenBtn.setAttribute("aria-pressed", "true"),
-);
-
-pipVideo.addEventListener("leavepictureinpicture", () =>
-  pipOpenBtn.setAttribute("aria-pressed", "false"),
-);
+pipVideo.addEventListener("enterpictureinpicture", syncPipUi);
+pipVideo.addEventListener("leavepictureinpicture", syncPipUi);
 
 function setMediaSession(active) {
   if (!("mediaSession" in navigator)) return;
@@ -549,29 +580,23 @@ btn.addEventListener("click", () => {
   }
 
   startSession();
+  // Must run inside the click: this is the only user gesture we will get, and
+  // without it the PiP window can never be opened later.
+  openPip("activate");
 });
 
-// While the tab is visible the wake lock alone keeps the screen awake, so the
-// floating window would only be in the way. The moment the tab is hidden that
-// lock is gone and only a video in PiP still holds a display assertion.
 document.addEventListener("visibilitychange", async () => {
   if (!userActive) return;
 
   if (document.visibilityState === "visible") {
     await acquireFormalLock();
-    if (pipAutoOpened) closePip();
     status.textContent = "Pantalla despierta activa";
     return;
   }
 
-  if (!document.pictureInPictureElement) {
-    pipAutoOpened = true;
-    await openPip("auto-hidden");
-  }
-
   status.textContent = document.pictureInPictureElement
     ? "Activo en segundo plano (ventana flotante)"
-    : "En segundo plano sin ventana flotante";
+    : "Sin ventana flotante: la pantalla puede bloquearse";
 });
 
 if (!("wakeLock" in navigator)) {

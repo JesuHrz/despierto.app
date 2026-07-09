@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Despierto — Mantén la pantalla de tu laptop despierta</title>
+<meta name="description" content="Despierto evita que tu laptop bloquee la pantalla o entre en reposo. Usa la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático. Sin instalar nada.">
+<meta name="keywords" content="wake lock, mantener pantalla encendida, evitar bloqueo de pantalla, no dormir pantalla, keep screen awake, caffeine web">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Jesús Hernández">
+<link rel="author" href="https://jesuhrz.com">
+<link rel="canonical" href="https://despierto.app/">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Despierto">
+<meta property="og:title" content="Despierto — Mantén la pantalla de tu laptop despierta">
+<meta property="og:description" content="Evita que tu laptop bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador de apagado automático. Sin instalar nada.">
+<meta property="og:url" content="https://despierto.app/">
+<meta property="og:image" content="https://despierto.app/og-image.svg">
+<meta property="og:locale" content="es_ES">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Despierto — Mantén la pantalla despierta">
+<meta name="twitter:description" content="Evita que tu laptop bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador. Sin instalar nada.">
+<meta name="twitter:image" content="https://despierto.app/og-image.svg">
+
+<!-- PWA / iconos -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Despierto">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/icon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" class="js-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%238b8b8f'/%3E%3C/svg%3E">
+
+<!-- Aplica el tema guardado ANTES del primer paint para evitar el flash de tema incorrecto -->
+<script>
+  try {
+    var t = localStorage.getItem('__@despierto.theme__');
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+</script>
+
+<link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Despierto",
+  "url": "https://despierto.app/",
+  "description": "Evita que tu laptop bloquee la pantalla o entre en reposo usando la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Cualquiera con navegador compatible con la Wake Lock API",
+  "browserRequirements": "Requiere JavaScript y la Screen Wake Lock API",
+  "inLanguage": "es",
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Person",
+    "name": "Jesús Hernández",
+    "url": "https://jesuhrz.com"
+  },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+</head>
+<body>
+  <button type="button" class="theme-toggle js-theme-toggle" aria-label="Cambiar tema">
+    <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  <main class="card">
+    <div class="card__dot-wrap js-status-dot-wrap" aria-hidden="true"><div class="card__dot js-status-dot"></div></div>
+    <h1>Despierto</h1>
+    <p class="card__subtitle">Evita que la pantalla se bloquee</p>
+
+    <div class="tabs" role="tablist" aria-label="Modo de activación">
+      <button type="button" class="tabs__btn is-active js-tab-stopwatch" id="tabStopwatch" role="tab" aria-selected="true" aria-controls="panelStopwatch">Cronómetro</button>
+      <button type="button" class="tabs__btn js-tab-timer" id="tabTimer" role="tab" aria-selected="false" aria-controls="panelTimer" tabindex="-1">Temporizador</button>
+    </div>
+
+    <div class="card__timer js-timer" aria-hidden="true">00:00:00</div>
+    <div class="card__remaining js-remaining" aria-hidden="true"></div>
+
+    <div id="panelStopwatch" role="tabpanel" aria-labelledby="tabStopwatch"></div>
+
+    <fieldset id="panelTimer" class="duration-picker js-panel-timer" role="tabpanel" aria-labelledby="tabTimer" hidden>
+      <legend class="sr-only">Duración</legend>
+      <div class="duration-picker__presets" role="group" aria-label="Duraciones predefinidas">
+        <button type="button" class="duration-picker__btn js-duration-btn" data-minutes="15" aria-pressed="false">15m</button>
+        <button type="button" class="duration-picker__btn js-duration-btn is-active" data-minutes="30" aria-pressed="true">30m</button>
+        <button type="button" class="duration-picker__btn js-duration-btn" data-minutes="45" aria-pressed="false">45m</button>
+      </div>
+      <div class="duration-picker__divider">o manual</div>
+      <div class="duration-picker__field">
+        <label class="duration-picker__custom-label" for="customDuration">Duración en horas</label>
+        <input type="text" class="duration-picker__custom-input js-duration-custom-input" id="customDuration" inputmode="decimal" placeholder="ej: 1.30, 4.5, .15" aria-describedby="durationHint">
+        <p class="duration-picker__hint" id="durationHint">Formato horas: <b>1.30</b> = 1h30m &nbsp;|&nbsp; <b>4.5</b> = 4h30m &nbsp;|&nbsp; <b>.15</b> = 15min</p>
+      </div>
+      <p class="duration-picker__selected js-duration-selected">Se apagará solo en 30min</p>
+    </fieldset>
+
+    <button class="card__toggle js-toggle-button" aria-pressed="false">Activar</button>
+    <p class="card__status js-status-message" role="status" aria-live="polite"></p>
+  </main>
+
+  <button type="button" class="history-clear js-history-clear" hidden>Borrar historial</button>
+  <aside class="history-feed" aria-label="Historial de activaciones">
+    <p class="history-feed__empty js-history-empty">Sin actividad aún</p>
+    <ul class="history-feed__list js-history-list"></ul>
+  </aside>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

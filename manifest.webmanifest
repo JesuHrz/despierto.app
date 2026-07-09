@@ -1,0 +1,19 @@
+{
+  "name": "Despierto — Mantén la pantalla despierta",
+  "short_name": "Despierto",
+  "description": "Evita que tu laptop bloquee la pantalla usando la Wake Lock API nativa del navegador, con cronómetro y temporizador de apagado automático.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#16a34a",
+  "lang": "es",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

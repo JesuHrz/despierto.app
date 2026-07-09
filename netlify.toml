@@ -1,0 +1,33 @@
+# Config de Netlify para Despierto — sitio estático, sin build.
+
+[build]
+  publish = "."
+
+# ---------- Redirects ----------
+# /index.html -> / (URL limpia). force = true equivale al "!" de _redirects.
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+# Cualquier ruta desconocida -> raíz. Sin force: los archivos reales
+# (styles.css, script.js, icon.svg, manifest.webmanifest, og-image.svg) se sirven primero.
+[[redirects]]
+  from = "/*"
+  to = "/"
+  status = 301
+
+# ---------- Headers ----------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Solo se desactivan features NO usadas. Wake Lock y autoplay quedan en su default
+    # (self) para no romper la app.
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    # Assets sin hash en el nombre: revalidar siempre (ETag -> 304) para que un
+    # redeploy con el mismo filename no sirva versiones viejas del cache del browser.
+    Cache-Control = "public, max-age=0, must-revalidate"

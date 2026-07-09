@@ -4,9 +4,14 @@ Evita que tu computadora bloquee la pantalla o entre en reposo mientras la pesta
 
 ## Propósito
 
-Muchas computadoras bloquean la pantalla a los ~15 min de inactividad. El viejo truco de dejar un video de YouTube en mute falla: al mutear, el navegador quita el estado "audible" del tab y libera el power-assertion que evitaba el sleep.
+Muchas computadoras bloquean la pantalla a los ~15 min de inactividad. Las salidas habituales son incómodas:
 
-Despierto lo resuelve de forma nativa y confiable, combinando dos mecanismos complementarios.
+- **Instalar una app** de terceros (mouse jiggler, caffeine y similares) solo para eso.
+- **Buscar un video en YouTube**: un contador sin audio, o uno con una ganancia tan baja que el oído humano no la percibe — el mismo principio que usa Despierto, pero dependiendo de que ese video siga existiendo y de tener un tab de YouTube abierto.
+
+Y el truco viejo de dejar un video en mute directamente no sirve: al mutear, el navegador quita el estado "audible" del tab y libera el power-assertion que evitaba el sleep.
+
+Despierto lo resuelve sin instalar nada, combinando dos mecanismos complementarios.
 
 ## Cómo funciona (dos mecanismos)
 

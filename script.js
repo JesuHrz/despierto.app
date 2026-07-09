@@ -16,6 +16,19 @@ const historyEmpty = document.querySelector('.js-history-empty');
 const clearHistoryBtn = document.querySelector('.js-history-clear');
 const themeToggle = document.querySelector('.js-theme-toggle');
 
+// Historial en modal (para mobile): mismas entradas, segundo contenedor.
+const historyOpenBtn = document.querySelector('.js-history-open');
+const historyDialog = document.querySelector('.js-history-dialog');
+const historyCloseBtn = document.querySelector('.js-history-close');
+const modalList = document.querySelector('.js-history-modal-list');
+const modalEmpty = document.querySelector('.js-history-modal-empty');
+const modalClearBtn = document.querySelector('.js-history-clear-modal');
+
+// El overlay lateral (desktop) y el modal (mobile) muestran las mismas entradas.
+const historyLists = [historyList, modalList];
+const historyEmpties = [historyEmpty, modalEmpty];
+const clearButtons = [clearHistoryBtn, modalClearBtn];
+
 const HISTORY_KEY = '__@despierto-store.history__';
 const THEME_KEY = '__@despierto.theme__';
 
@@ -246,21 +259,34 @@ function buildHistoryItemHTML(entry, seq) {
 }
 
 function updateHistoryVisibility(count) {
-  historyEmpty.style.display = count ? 'none' : 'block';
-  clearHistoryBtn.hidden = !count;
+  historyEmpties.forEach(el => { el.style.display = count ? 'none' : 'block'; });
+  clearButtons.forEach(btn => { btn.hidden = !count; });
 }
 
 function renderHistory() {
   const list = loadHistory();
-  historyList.innerHTML = list.map((entry, i) => buildHistoryItemHTML(entry, list.length - i)).join('');
+  const html = list.map((entry, i) => buildHistoryItemHTML(entry, list.length - i)).join('');
+  historyLists.forEach(el => { el.innerHTML = html; });
   updateHistoryVisibility(list.length);
 }
 
-clearHistoryBtn.addEventListener('click', () => {
+function clearHistory() {
   if (confirm('¿Borrar todo el historial?')) {
     saveHistory([]);
     renderHistory();
   }
+}
+
+clearButtons.forEach(btn => btn.addEventListener('click', clearHistory));
+
+// Modal nativo del historial (trigger visible en mobile; en desktop está el overlay).
+historyOpenBtn.addEventListener('click', () => historyDialog.showModal());
+historyCloseBtn.addEventListener('click', () => historyDialog.close());
+historyDialog.addEventListener('click', e => {
+  // click fuera de la caja del dialog (sobre el ::backdrop) -> cerrar
+  const r = historyDialog.getBoundingClientRect();
+  const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+  if (outside) historyDialog.close();
 });
 
 function addHistoryEntry(reason) {
@@ -270,7 +296,8 @@ function addHistoryEntry(reason) {
   const list = loadHistory();
   list.unshift(entry);
   saveHistory(list);
-  historyList.insertAdjacentHTML('afterbegin', buildHistoryItemHTML(entry, list.length));
+  const itemHTML = buildHistoryItemHTML(entry, list.length);
+  historyLists.forEach(el => el.insertAdjacentHTML('afterbegin', itemHTML));
   updateHistoryVisibility(list.length);
 }
 

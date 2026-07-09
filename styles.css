@@ -573,3 +573,137 @@ fieldset.duration-picker[hidden] {
     display: none;
   }
 }
+
+.history-link {
+  display: none;
+}
+
+.history-link:hover {
+  opacity: 1;
+  background: rgba(var(--card-rgb), 0.85);
+}
+
+@media (max-width: 860px) {
+  .history-link {
+    display: inline-block;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    width: auto;
+    margin: 0;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(var(--card-rgb), 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.history-modal {
+  width: min(92vw, 420px);
+  max-height: 82vh;
+  margin: 6vh auto auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.history-modal::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.history-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-modal__title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.history-modal__close {
+  width: auto;
+  padding: 0.15rem 0.5rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  background: transparent;
+  color: var(--accent-off);
+  border: none;
+}
+
+.history-modal__close:hover {
+  opacity: 1;
+  color: var(--fg);
+}
+
+.history-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  max-height: calc(82vh - 3.5rem);
+  overflow-y: auto;
+}
+
+.history-modal__clear {
+  align-self: flex-end;
+  width: auto;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--accent-off);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.history-modal__clear:hover {
+  opacity: 1;
+  color: var(--fg);
+}
+
+.history-modal .history-feed__empty {
+  text-align: center;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--accent-off);
+  pointer-events: none;
+}
+
+.footer__heart {
+  color: #e0245e;
+}
+
+.footer__link {
+  color: var(--accent-auto);
+  font-weight: 600;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.footer__link:hover {
+  text-decoration: underline;
+}

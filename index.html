@@ -109,6 +109,7 @@
 
     <button class="card__toggle js-toggle-button" aria-pressed="false">Activar</button>
     <p class="card__status js-status-message" role="status" aria-live="polite"></p>
+    <button type="button" class="history-link js-history-open" aria-haspopup="dialog">Ver historial</button>
   </main>
 
   <button type="button" class="history-clear js-history-clear" hidden>Borrar historial</button>
@@ -116,6 +117,23 @@
     <p class="history-feed__empty js-history-empty">Sin actividad aún</p>
     <ul class="history-feed__list js-history-list"></ul>
   </aside>
+
+  <dialog class="history-modal js-history-dialog" aria-labelledby="historyModalTitle">
+    <div class="history-modal__head">
+      <h2 class="history-modal__title" id="historyModalTitle">Historial</h2>
+      <button type="button" class="history-modal__close js-history-close" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="history-modal__body">
+      <button type="button" class="history-modal__clear js-history-clear-modal" hidden>Borrar historial</button>
+      <p class="history-feed__empty js-history-modal-empty">Sin actividad aún</p>
+      <ul class="history-feed__list js-history-modal-list"></ul>
+    </div>
+  </dialog>
+
+  <footer class="footer">
+    Hecho con <span class="footer__heart" aria-hidden="true">&hearts;</span> por
+    <a class="footer__link" href="https://jesuhrz.com" target="_blank" rel="noopener">jesuhrz</a>
+  </footer>
 
   <script type="module" src="script.js"></script>
 </body>

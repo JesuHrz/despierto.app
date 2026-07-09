@@ -19,6 +19,9 @@ const themeToggle = document.querySelector(".js-theme-toggle");
 const historyOpenBtn = document.querySelector(".js-history-open");
 const historyDialog = document.querySelector(".js-history-dialog");
 const historyCloseBtn = document.querySelector(".js-history-close");
+const guideOpenBtn = document.querySelector(".js-guide-open");
+const guideDialog = document.querySelector(".js-guide-dialog");
+const guideCloseBtn = document.querySelector(".js-guide-close");
 const modalList = document.querySelector(".js-history-modal-list");
 const modalEmpty = document.querySelector(".js-history-modal-empty");
 const modalClearBtn = document.querySelector(".js-history-clear-modal");
@@ -27,14 +30,12 @@ const historyLists = [historyList, modalList];
 const historyEmpties = [historyEmpty, modalEmpty];
 const clearButtons = [clearHistoryBtn, modalClearBtn];
 
-const pipSupported = "documentPictureInPicture" in window;
+const pipSupported = document.pictureInPictureEnabled === true;
 const pipOpenBtn = document.querySelector(".js-pip-open");
-const pipWidget = document.querySelector(".js-pip-widget");
-const pipLabel = document.querySelector(".js-pip-label");
-const pipTime = document.querySelector(".js-pip-time");
-const pipMeta = document.querySelector(".js-pip-meta");
-const pipStop = document.querySelector(".js-pip-stop");
-let pipWindow = null;
+const pipCanvas = document.querySelector(".js-pip-canvas");
+const pipVideo = document.querySelector(".js-pip-video");
+let pipStream = null;
+let pipAutoOpened = false;
 
 const HISTORY_KEY = "__@despierto-store.history__";
 const THEME_KEY = "__@despierto.theme__";
@@ -50,12 +51,10 @@ function currentTheme() {
 }
 
 function syncThemeToggleLabel() {
-  themeToggle.setAttribute(
-    "aria-label",
-    currentTheme() === "dark"
-      ? "Cambiar a modo claro"
-      : "Cambiar a modo oscuro",
-  );
+  const label =
+    currentTheme() === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
+  themeToggle.setAttribute("aria-label", label);
+  themeToggle.title = label;
 }
 
 themeToggle.addEventListener("click", () => {
@@ -79,9 +78,6 @@ function updateFavicon(active) {
 let wakeLock = null;
 let startTime = null;
 let timerInterval = null;
-let audioCtx = null;
-let oscillator = null;
-let gainNode = null;
 
 let userActive = false;
 let activeTab = "stopwatch";
@@ -276,17 +272,25 @@ function clearHistory() {
 
 clearButtons.forEach((btn) => btn.addEventListener("click", clearHistory));
 
+function closeOnBackdropClick(dialog) {
+  dialog.addEventListener("click", (e) => {
+    const r = dialog.getBoundingClientRect();
+    const outside =
+      e.clientX < r.left ||
+      e.clientX > r.right ||
+      e.clientY < r.top ||
+      e.clientY > r.bottom;
+    if (outside) dialog.close();
+  });
+}
+
 historyOpenBtn.addEventListener("click", () => historyDialog.showModal());
 historyCloseBtn.addEventListener("click", () => historyDialog.close());
-historyDialog.addEventListener("click", (e) => {
-  const r = historyDialog.getBoundingClientRect();
-  const outside =
-    e.clientX < r.left ||
-    e.clientX > r.right ||
-    e.clientY < r.top ||
-    e.clientY > r.bottom;
-  if (outside) historyDialog.close();
-});
+closeOnBackdropClick(historyDialog);
+
+guideOpenBtn.addEventListener("click", () => guideDialog.showModal());
+guideCloseBtn.addEventListener("click", () => guideDialog.close());
+closeOnBackdropClick(guideDialog);
 
 function addHistoryEntry(reason) {
   if (!startTime) return;
@@ -324,32 +328,6 @@ function stopTimer() {
   remainingEl.textContent = "";
 }
 
-function startSilentAudio() {
-  if (audioCtx) return;
-
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  oscillator = audioCtx.createOscillator();
-  gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0.0001;
-  oscillator.frequency.value = 20;
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  oscillator.start();
-  audioCtx.resume();
-}
-
-function stopSilentAudio() {
-  if (!audioCtx) return;
-
-  oscillator.stop();
-  oscillator.disconnect();
-  gainNode.disconnect();
-  audioCtx.close();
-  audioCtx = null;
-  oscillator = null;
-  gainNode = null;
-}
-
 function setUI(active, msg) {
   dot.classList.toggle("is-on", active);
   dotWrap.classList.toggle("is-on", active);
@@ -359,103 +337,128 @@ function setUI(active, msg) {
   status.textContent = active ? msg || "" : "Sin actividad";
   setDurationPickerEnabled(!active);
   setTabsEnabled(!active);
-  pipOpenBtn.hidden = !(pipSupported && active);
+  pipOpenBtn.disabled = !active;
+  pipOpenBtn.title = active
+    ? "Ventana flotante"
+    : "Necesita una sesión activa";
   setMediaSession(active);
-  if (!active) closePip();
+  if (!active) stopPipVideo();
 }
 
-function pipRenderStatic() {
+function cssVar(name, fallback) {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return value || fallback;
+}
+
+function pipDraw() {
+  const ctx = pipCanvas.getContext("2d");
+  const { width, height } = pipCanvas;
   const isTimer = activeTab === "timer" && Boolean(autoStopAt);
-  pipLabel.textContent = isTimer ? "Temporizador" : "Cronómetro";
-  pipMeta.hidden = !isTimer;
+
+  ctx.fillStyle = cssVar("--bg", "#121212");
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = cssVar("--accent-on", "#16a34a");
+  ctx.beginPath();
+  ctx.arc(width / 2, 46, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.font = "600 20px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+  ctx.fillStyle = cssVar("--accent-off", "#8b8b8f");
+  ctx.fillText(isTimer ? "TEMPORIZADOR" : "CRONÓMETRO", width / 2, 100);
+
+  ctx.font = "700 62px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+  ctx.fillStyle = cssVar("--fg", "#f5f5f7");
+  ctx.fillText(startTime ? formatDuration(Date.now() - startTime) : "00:00:00", width / 2, 172);
+
+  if (isTimer) {
+    const remainingMs = autoStopAt - Date.now();
+    ctx.font = "600 20px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+    ctx.fillStyle = cssVar("--accent-auto", "#d97706");
+    ctx.fillText(
+      remainingMs > 0
+        ? `Se apaga en ${formatDuration(remainingMs)} · dura ${formatHM(selectedMinutes)}`
+        : "Terminando…",
+      width / 2,
+      222,
+    );
+  }
 }
 
 function pipUpdate() {
-  if (!pipWindow || !startTime) return;
-  pipTime.textContent = formatDuration(Date.now() - startTime);
-  if (activeTab === "timer" && autoStopAt) {
-    const remainingMs = autoStopAt - Date.now();
-    pipMeta.textContent =
-      remainingMs > 0
-        ? `Se apaga en ${formatDuration(remainingMs)} · dura ${formatHM(selectedMinutes)}`
-        : "Terminando…";
-  }
+  if (userActive) pipDraw();
 }
 
-function pipCopyStyles(win) {
-  document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
-    const clone = win.document.createElement("link");
-    clone.rel = "stylesheet";
-    clone.href = link.href;
-    win.document.head.appendChild(clone);
-  });
-  document.querySelectorAll("style").forEach((style) => {
-    win.document.head.appendChild(style.cloneNode(true));
-  });
+// The canvas stream is what makes Chromium hold a display wake lock: a playing
+// <video> keeps the screen awake while the page is visible, and keeps it awake
+// even when the tab is hidden as long as the video sits in Picture-in-Picture.
+async function startPipVideo() {
+  if (pipStream) return;
 
-  const base = win.document.createElement("style");
-  base.textContent =
-    "body{margin:0;height:100vh;display:grid;place-items:center;" +
-    "background:var(--bg);color:var(--fg);" +
-    'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}';
-  win.document.head.appendChild(base);
+  pipDraw();
+  pipStream = pipCanvas.captureStream(4);
+  pipVideo.srcObject = pipStream;
 
-  const theme = document.documentElement.getAttribute("data-theme");
-  if (theme) win.document.documentElement.setAttribute("data-theme", theme);
+  try {
+    await pipVideo.play();
+  } catch (err) {}
+}
+
+function stopPipVideo() {
+  pipAutoOpened = false;
+
+  if (document.pictureInPictureElement) {
+    document.exitPictureInPicture().catch(() => {})
+  };
+
+  if (!pipStream) return;
+
+  pipVideo.pause();
+  pipStream.getTracks().forEach((track) => track.stop());
+  pipVideo.srcObject = null;
+  pipStream = null;
 }
 
 async function openPip(source) {
-  if (!pipSupported || !userActive || pipWindow) return;
-  try {
-    pipWindow = await documentPictureInPicture.requestWindow({
-      width: 300,
-      height: 190,
-    });
-  } catch (err) {
-    return;
-  }
-  pipCopyStyles(pipWindow);
-  pipWidget.hidden = false;
-  pipWindow.document.body.append(pipWidget);
-  pipRenderStatic();
-  pipUpdate();
-  pipOpenBtn.setAttribute("aria-pressed", "true");
-  pipWindow.addEventListener("pagehide", pipCleanup);
-  track("pip_open", { mode: activeTab, source: source || "auto" });
-}
+  if (!pipSupported || !userActive || document.pictureInPictureElement) return;
 
-function pipCleanup() {
-  if (pipWidget) {
-    pipWidget.hidden = true;
-    document.body.append(pipWidget);
-  }
-  pipWindow = null;
-  pipOpenBtn.setAttribute("aria-pressed", "false");
+  await startPipVideo();
+
+  try {
+    await pipVideo.requestPictureInPicture();
+    track("pip_open", { mode: activeTab, source: source || "auto" });
+  } catch (err) {}
 }
 
 function closePip() {
-  if (pipWindow) pipWindow.close();
+  if (document.pictureInPictureElement) {
+    document.exitPictureInPicture().catch(() => {});
+  }
 }
 
 function togglePip() {
-  if (pipWindow) {
+  if (document.pictureInPictureElement) {
     closePip();
     return;
   }
 
+  // Opened by hand: keep it around when the tab comes back into view.
+  pipAutoOpened = false;
   openPip("button");
 }
 
 pipOpenBtn.addEventListener("click", togglePip);
-pipStop.addEventListener("click", () => stopSession("manual"));
 
-if (pipSupported && "mediaSession" in navigator) {
-  try {
-    navigator.mediaSession.setActionHandler("enterpictureinpicture", () =>
-      openPip(),
-    );
-  } catch (err) {}
-}
+pipVideo.addEventListener("enterpictureinpicture", () =>
+  pipOpenBtn.setAttribute("aria-pressed", "true"),
+);
+
+pipVideo.addEventListener("leavepictureinpicture", () =>
+  pipOpenBtn.setAttribute("aria-pressed", "false"),
+);
 
 function setMediaSession(active) {
   if (!("mediaSession" in navigator)) return;
@@ -471,7 +474,9 @@ function setMediaSession(active) {
 
 updateFavicon(false);
 renderHistory();
+
 status.textContent = "Sin actividad";
+pipOpenBtn.hidden = !pipSupported;
 
 async function acquireFormalLock() {
   if (!("wakeLock" in navigator) || wakeLock) return;
@@ -511,14 +516,12 @@ function stopSession(reason) {
     wakeLock = null;
   }
 
-  stopSilentAudio();
   stopTimer();
   setUI(false, "");
 }
 
 async function startSession() {
   userActive = true;
-  startSilentAudio();
 
   track("session_start", {
     mode: activeTab,
@@ -536,27 +539,41 @@ async function startSession() {
   }
   setUI(true, "Pantalla despierta activa");
   await acquireFormalLock();
+  await startPipVideo();
 }
 
 btn.addEventListener("click", () => {
   if (userActive) {
     stopSession("manual");
-  } else {
-    startSession();
+    return;
   }
+
+  startSession();
 });
 
+// While the tab is visible the wake lock alone keeps the screen awake, so the
+// floating window would only be in the way. The moment the tab is hidden that
+// lock is gone and only a video in PiP still holds a display assertion.
 document.addEventListener("visibilitychange", async () => {
   if (!userActive) return;
 
   if (document.visibilityState === "visible") {
     await acquireFormalLock();
+    if (pipAutoOpened) closePip();
     status.textContent = "Pantalla despierta activa";
-  } else {
-    status.textContent = "Activo en segundo plano (audio)";
+    return;
   }
+
+  if (!document.pictureInPictureElement) {
+    pipAutoOpened = true;
+    await openPip("auto-hidden");
+  }
+
+  status.textContent = document.pictureInPictureElement
+    ? "Activo en segundo plano (ventana flotante)"
+    : "En segundo plano sin ventana flotante";
 });
 
 if (!("wakeLock" in navigator)) {
-  status.textContent = "Wake Lock no soportado — usando solo modo audio";
+  status.textContent = "Wake Lock no soportado en este navegador";
 }

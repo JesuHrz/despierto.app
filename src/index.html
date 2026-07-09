@@ -29,12 +29,7 @@
   <meta name="twitter:description" content="Evita que tu computadora bloquee la pantalla. Wake Lock nativo, cronómetro y temporizador. Sin instalar nada.">
   <meta name="twitter:image" content="https://despierto.app/og-image.svg">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Despierto">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
   <link rel="apple-touch-icon" href="/icon.svg">
-  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" class="js-favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%238b8b8f'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 
@@ -87,12 +82,15 @@
 </head>
 <body>
   <div class="top-controls">
-    <button type="button" class="pip-toggle js-pip-open" aria-label="Abrir ventana flotante" aria-pressed="false" hidden>
+    <button type="button" class="top-controls__btn pip-toggle js-pip-open" aria-label="Abrir ventana flotante" aria-pressed="false" title="Necesita una sesión activa" disabled>
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="11" y="11" width="8" height="5" rx="1" fill="currentColor"/></svg>
     </button>
-    <button type="button" class="theme-toggle js-theme-toggle" aria-label="Cambiar tema">
+    <button type="button" class="top-controls__btn theme-toggle js-theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
       <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button type="button" class="top-controls__btn guide-toggle js-guide-open" aria-label="Cómo funciona" title="Cómo funciona">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.75" r="0.6" fill="currentColor" stroke="none"/></svg>
     </button>
   </div>
 
@@ -141,7 +139,7 @@
   <dialog class="history-modal js-history-dialog" aria-labelledby="historyModalTitle">
     <div class="history-modal__head">
       <h2 class="history-modal__title" id="historyModalTitle">Historial</h2>
-      <button type="button" class="history-modal__close js-history-close" aria-label="Cerrar">&times;</button>
+      <button type="button" class="history-modal__close js-history-close" aria-label="Cerrar" title="Cerrar">&times;</button>
     </div>
     <div class="history-modal__body">
       <button type="button" class="history-modal__clear js-history-clear-modal" hidden>Borrar historial</button>
@@ -150,17 +148,125 @@
     </div>
   </dialog>
 
+  <dialog class="guide js-guide-dialog" aria-labelledby="guideTitle">
+    <div class="guide__head">
+      <h2 class="guide__title" id="guideTitle">Cómo funciona Despierto</h2>
+      <button type="button" class="guide__close js-guide-close" aria-label="Cerrar" title="Cerrar">&times;</button>
+    </div>
+
+    <div class="guide__body">
+      <p class="guide__lead">
+        Tu computadora bloquea la pantalla cuando no la tocás por un rato. Despierto le pide al navegador que no la deje dormir, mientras la sesión esté activa. No instala nada ni cambia la configuración de tu equipo: apenas desactivás, todo vuelve a la normalidad.
+      </p>
+
+      <section class="guide__section">
+        <h3 class="guide__section-title">Los dos modos</h3>
+        <ul class="guide__list">
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><line x1="12" y1="13" x2="12" y2="9"/><line x1="9" y1="2" x2="15" y2="2"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Cronómetro</span>
+              <p class="guide__desc">Cuenta hacia arriba y no se apaga solo. Lo desactivás vos cuando terminás.</p>
+            </span>
+          </li>
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 13V9"/><path d="M12 13l3.5 2"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Temporizador</span>
+              <p class="guide__desc">Elegís 15, 30 o 45 minutos, o escribís una duración a mano. Al llegar a cero se apaga solo.</p>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="guide__section">
+        <h3 class="guide__section-title">Escribir una duración</h3>
+        <ul class="guide__list">
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Se cuenta en horas</span>
+              <p class="guide__desc">
+                <span class="guide__code">4.5</span> con un decimal es media hora: 4h 30min.
+                Con dos decimales son minutos literales: <span class="guide__code">1.30</span> es 1h 30min y
+                <span class="guide__code">.15</span> son 15 minutos.
+              </p>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="guide__section">
+        <h3 class="guide__section-title">Los botones de arriba</h3>
+        <ul class="guide__list">
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="11" y="11" width="8" height="5" rx="1" fill="currentColor"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Ventana flotante</span>
+              <p class="guide__desc">Abre o cierra un mini reloj que queda encima de todas las ventanas. Se habilita cuando hay una sesión activa.</p>
+            </span>
+          </li>
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Tema claro / oscuro</span>
+              <p class="guide__desc">Arranca siguiendo el tema de tu sistema. Si lo cambiás, se recuerda.</p>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="guide__section">
+        <h3 class="guide__section-title">Por qué aparece la ventana flotante sola</h3>
+        <ul class="guide__list">
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Mientras estás en la pestaña</span>
+              <p class="guide__desc">El navegador mantiene la pantalla despierta y no hace falta nada más.</p>
+            </span>
+          </li>
+          <li class="guide__item">
+            <span class="guide__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h8v12H3z"/><path d="M14 9l4 3-4 3"/><path d="M21 6v12"/></svg>
+            </span>
+            <span>
+              <span class="guide__term">Cuando te cambiás de pestaña</span>
+              <p class="guide__desc">El navegador suelta ese permiso por seguridad. La ventana flotante se abre sola para tomar su lugar, y se cierra cuando volvés.</p>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <p class="guide__note">
+        <span aria-hidden="true">⚠️</span>
+        <span>
+          Si <b>cerrás la ventana flotante</b> y te vas a otra pestaña, la pantalla puede bloquearse. Cerrar la tapa o suspender el equipo a mano siempre gana: eso ninguna web lo evita.
+        </span>
+      </p>
+    </div>
+  </dialog>
+
   <footer class="footer">
     Hecho con <span class="footer__heart" aria-hidden="true">&hearts;</span> por
     <a class="footer__link" href="https://jesuhrz.com" target="_blank" rel="noopener">jesuhrz</a>
   </footer>
 
-  <div class="pip js-pip-widget" hidden>
-    <div class="pip__dot-wrap"><div class="pip__dot"></div></div>
-    <div class="pip__label js-pip-label">Cronómetro</div>
-    <div class="pip__time js-pip-time">00:00:00</div>
-    <div class="pip__meta js-pip-meta" hidden></div>
-    <button type="button" class="pip__stop js-pip-stop">Desactivar</button>
+  <div class="pip-stage" aria-hidden="true">
+    <canvas class="js-pip-canvas" width="480" height="270"></canvas>
+    <video class="js-pip-video" muted playsinline></video>
   </div>
 
   <script type="module" src="script.js"></script>

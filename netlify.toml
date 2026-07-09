@@ -12,7 +12,7 @@
   force = true
 
 # Cualquier ruta desconocida -> raíz. Sin force: los archivos reales
-# (styles.css, script.js, icon.svg, manifest.webmanifest, og-image.svg) se sirven primero.
+# (styles.css, script.js, icon.svg, og-image.svg) se sirven primero.
 # El destino tiene que ser /index.html y no /: con "to = /" la regla se matchea a sí
 # misma (/* incluye /) y el motor de redirects la ignora en runtime, sin reportar error
 # en el deploy. La regla de arriba se encarga de dejar la URL final en /.

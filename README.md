@@ -7,25 +7,35 @@ Evita que tu computadora bloquee la pantalla o entre en reposo mientras la pesta
 Muchas computadoras bloquean la pantalla a los ~15 min de inactividad. Las salidas habituales son incómodas:
 
 - **Instalar una app** de terceros (mouse jiggler, caffeine y similares) solo para eso.
-- **Buscar un video en YouTube**: un contador sin audio, o uno con una ganancia tan baja que el oído humano no la percibe — el mismo principio que usa Despierto, pero dependiendo de que ese video siga existiendo y de tener un tab de YouTube abierto.
+- **Cambiar la configuración de energía** del sistema, y después olvidarte de dejarla como estaba.
+- **Buscar un video en YouTube** de un contador de 3 horas y dejarlo corriendo. Funciona, porque un `<video>` reproduciéndose hace que el navegador pida que la pantalla no duerma. Pero depende de que ese video siga existiendo, se te va a cero si cambiás de pestaña, y te comés el ancho de banda.
 
-Y el truco viejo de dejar un video en mute directamente no sirve: al mutear, el navegador quita el estado "audible" del tab y libera el power-assertion que evitaba el sleep.
+Despierto hace lo mismo que ese video, pero deliberadamente y sin depender de nadie: sin instalar nada, sin tocar la configuración del equipo, y cubriendo también el caso de irte a otra pestaña.
 
-Despierto lo resuelve sin instalar nada, combinando dos mecanismos complementarios.
+> **Nota**: circula la idea de que mutear el video rompe el efecto. Medido con `pmset -g assertions`, es falso: un `<video>` muteado toma exactamente la misma assertion (`Video Wake Lock`) que uno con audio. Lo que sí rompe el efecto es **ocultar la pestaña**.
 
 ## Cómo funciona (dos mecanismos)
 
-| | Wake Lock API | Tono inaudible (Web Audio) |
+| | Wake Lock API | Video en Picture-in-Picture |
 |---|---|---|
-| Qué es | API oficial del navegador (`navigator.wakeLock`) | Hack: genera un tono real casi silencioso |
+| Qué es | API oficial del navegador (`navigator.wakeLock`) | Un `<video>` (canvas) reproduciéndose en PiP |
 | Tab visible | ✅ | ✅ |
 | Tab oculto / otra app encima | ❌ (el spec lo libera) | ✅ (único que sobrevive) |
-| Eficiencia | Alta, integrado al OS | Usa el subsistema de audio |
+| Assertion de macOS | `NoDisplaySleepAssertion "Blink Wake Lock"` | `NoDisplaySleepAssertion "Video Wake Lock"` |
 
-- **Wake Lock API**: método correcto y eficiente. El spec lo libera al ocultar el tab, así que solo cubre primer plano.
-- **Tono inaudible**: un `OscillatorNode` a 20 Hz con ganancia mínima (`0.0001`, inaudible pero > 0) mantiene el tab marcado como "audible", y el navegador sostiene su propio power-assertion **incluso en segundo plano**. Mutear o poner ganancia 0 rompe el efecto.
+- **Wake Lock API**: método correcto y eficiente, pero el spec lo libera al ocultar el tab. Solo cubre primer plano.
+- **Video en PiP**: Chromium sostiene una assertion de *display sleep* mientras hay un `<video>` reproduciéndose y visible, o en Picture-in-Picture. Como la ventana de PiP es independiente del tab, la assertion sobrevive aunque cambies de pestaña o de app. Es el mismo mecanismo por el que Google Meet mantiene la pantalla viva.
 
-Foreground manda Wake Lock (audio de respaldo); background carga solo el audio.
+Mientras el tab está visible alcanza con el Wake Lock, así que la ventana flotante no aparece y no estorba. **Se abre sola en cuanto el tab se oculta**, que es justo cuando el Wake Lock muere, y se cierra sola al volver. Si la abrís a mano con el botón, se queda.
+
+Si la cerrás y te vas a otra pestaña, no queda nada sosteniendo la pantalla (la app te lo avisa en el estado).
+
+### Por qué no usamos audio
+
+Un tono inaudible (`OscillatorNode` con ganancia `0.0001`) parece una solución elegante, pero medido con `pmset -g assertions` no hace nada:
+
+- A ganancia `0.0001` Chrome ni siquiera considera el tab audible: **no toma ninguna assertion**.
+- Subiéndole el volumen sí toma una, pero es `NoIdleSleepAssertion`: evita que el **sistema** se suspenda, no que la **pantalla** se bloquee. Son cosas distintas en macOS (por eso la pantalla se apaga aunque estés escuchando música).
 
 ## Funcionalidades
 
@@ -36,18 +46,40 @@ Foreground manda Wake Lock (audio de respaldo); background carga solo el audio.
     - `1.30` / `.15` (2 decimales) = minutos literales → 1h 30min / 15min
 - **Historial** de sesiones (localStorage): duración con milisegundos, numeración, y etiqueta de modo (cronómetro / temporizador). Con botón para borrar.
 - **Tema claro/oscuro** con toggle persistente (sin flash al cargar) y detección del sistema.
-- **Ventana flotante** (Document Picture-in-Picture): mini-widget always-on-top con el estado de la sesión, para seguir viéndolo al cambiar de tab o app (Chromium; auto-abre si se instala como PWA).
+- **Ventana flotante** (Picture-in-Picture): mini-widget always-on-top con el estado de la sesión. Se abre sola al ocultar el tab y es lo que mantiene la pantalla despierta en segundo plano (Chromium).
+- **Guía de uso** en un `<dialog>` nativo, desde el icono de información.
 - **Favicon dinámico** (gris apagado / verde activo) y punto con animación tipo radar.
 - Accesible (roles ARIA, `aria-live`, navegación por teclado) y con metadata SEO + JSON-LD.
 
 ## Limitación conocida
 
-Mientras el tab está oculto/minimizado, el Wake Lock real no aplica (límite del spec); el tono inaudible cubre ese caso pero es un comportamiento no documentado del navegador. Para 100% garantizado en background, la alternativa a nivel sistema es `caffeinate -d` (macOS) en terminal. Cerrar la tapa o suspender el sistema siempre gana: ningún JS lo evita.
+Con el tab oculto, el Wake Lock no aplica (límite del spec) y la única cobertura es la ventana flotante de PiP. Si la cerrás y te vas a otra pestaña, la pantalla se bloquea.
+
+PiP de video es una API de Chromium; en Firefox y Safari no hay equivalente accesible desde JS, así que ahí Despierto solo cubre el tab visible. Cerrar la tapa o suspender el sistema siempre gana: ningún JS lo evita.
+
+Para algo garantizado a nivel sistema, la alternativa es `caffeinate -d` (macOS) en terminal.
+
+### Cómo verificarlo
+
+macOS expone qué apps están evitando el sleep. Con Despierto activo:
+
+```bash
+pmset -g assertions | grep -i "Google Chrome"
+```
+
+Si aparece un `NoDisplaySleepAssertion`, la pantalla no se va a bloquear. Si no aparece ninguno, sí.
 
 ## Requisitos
 
 - Navegador con **Screen Wake Lock API** y JavaScript.
 - **HTTPS** (o `localhost`): la Wake Lock API solo corre en contexto seguro.
+- Para el modo segundo plano, un navegador con **Picture-in-Picture de video** (Chromium: Chrome, Edge, Brave, Arc).
+
+## Analítica
+
+Google Analytics 4 se carga **solo en `despierto.app`**. En `localhost`, en los deploy previews de Netlify o en cualquier otro host, el script no se descarga y `window.gtag` no existe: `track()` queda en no-op. El gate es un chequeo de `location.hostname` en `index.html` — sin build ni variables de entorno, que no existen en una app sin bundler.
+
+Eventos: `session_start` y `session_stop` (con `mode` y duración), `pip_open` (con `source`: botón o automático) y `theme_change` (con el tema destino). Los parámetros necesitan registrarse como *custom dimensions* en GA para verlos en los reportes.
 
 ## Desarrollo
 
@@ -66,10 +98,9 @@ Abrí la URL que imprime (típico `http://localhost:8080`). La app de producció
 src/
   index.html            markup + metadata (SEO, Open Graph, JSON-LD)
   styles.css            estilos + temas (data-theme)
-  script.js             lógica (wake lock, audio, timer, historial, tema, PiP)
-  icon.svg              ícono PWA
+  script.js             lógica (wake lock, PiP, timer, historial, tema, analítica)
+  icon.svg              ícono (apple-touch-icon)
   og-image.svg          imagen para compartir en redes
-  manifest.webmanifest  PWA
 package.json            scripts de desarrollo (dev = live-server src)
 netlify.toml            deploy (publish = "src", redirects, headers)
 README.md

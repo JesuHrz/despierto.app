@@ -39,6 +39,10 @@ let pipWindow = null;
 const HISTORY_KEY = "__@despierto-store.history__";
 const THEME_KEY = "__@despierto.theme__";
 
+function track(name, params) {
+  if (typeof window.gtag === "function") window.gtag("event", name, params);
+}
+
 function currentTheme() {
   const explicit = document.documentElement.getAttribute("data-theme");
   if (explicit === "light" || explicit === "dark") return explicit;
@@ -61,6 +65,7 @@ themeToggle.addEventListener("click", () => {
     localStorage.setItem(THEME_KEY, next);
   } catch (err) {}
   syncThemeToggleLabel();
+  track("theme_change", { theme: next });
 });
 
 syncThemeToggleLabel();
@@ -399,7 +404,7 @@ function pipCopyStyles(win) {
   if (theme) win.document.documentElement.setAttribute("data-theme", theme);
 }
 
-async function openPip() {
+async function openPip(source) {
   if (!pipSupported || !userActive || pipWindow) return;
   try {
     pipWindow = await documentPictureInPicture.requestWindow({
@@ -416,6 +421,7 @@ async function openPip() {
   pipUpdate();
   pipOpenBtn.setAttribute("aria-pressed", "true");
   pipWindow.addEventListener("pagehide", pipCleanup);
+  track("pip_open", { mode: activeTab, source: source || "auto" });
 }
 
 function pipCleanup() {
@@ -432,8 +438,12 @@ function closePip() {
 }
 
 function togglePip() {
-  if (pipWindow) closePip();
-  else openPip();
+  if (pipWindow) {
+    closePip();
+    return;
+  }
+
+  openPip("button");
 }
 
 pipOpenBtn.addEventListener("click", togglePip);
@@ -481,6 +491,13 @@ async function acquireFormalLock() {
 function stopSession(reason) {
   userActive = false;
 
+  if (reason === "manual") {
+    track("session_stop", {
+      mode: activeTab,
+      elapsed_seconds: startTime ? Math.round((Date.now() - startTime) / 1000) : 0,
+    });
+  }
+
   if (autoStopTimeout) {
     clearTimeout(autoStopTimeout);
     autoStopTimeout = null;
@@ -502,6 +519,11 @@ function stopSession(reason) {
 async function startSession() {
   userActive = true;
   startSilentAudio();
+
+  track("session_start", {
+    mode: activeTab,
+    duration_minutes: activeTab === "timer" ? selectedMinutes || 0 : 0,
+  });
 
   if (!timerInterval) startTimer();
 

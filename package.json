@@ -6,9 +6,16 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "live-server src"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.0.9"
   },
   "devDependencies": {
-    "live-server": "1.2.2"
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^6.0.3"
   }
 }

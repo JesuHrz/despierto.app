@@ -1,0 +1,13 @@
+---
+import type { Dict } from "@/libs/i18n/es";
+interface Props {
+  t: Dict;
+}
+const { t } = Astro.props;
+---
+
+<aside class="history-feed" aria-label={t.history.feedLabel}>
+  <button type="button" class="history-clear js-history-clear" hidden>{t.history.clear}</button>
+  <p class="history-feed__empty js-history-empty">{t.history.empty}</p>
+  <ul class="history-feed__list js-history-list"></ul>
+</aside>

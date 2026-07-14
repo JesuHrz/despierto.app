@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://despierto.app/sitemap-index.xml

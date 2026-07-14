@@ -111,38 +111,64 @@ h1 {
   margin: 0 0 1.75rem;
 }
 
-.card__dot-wrap {
-  position: relative;
-  width: 14px;
-  height: 14px;
+.eyes {
+  width: 76px;
   margin: 0 auto 1.75rem;
+  color: var(--accent-off);
+  transition: color 0.4s ease;
 }
 
-.card__dot {
-  position: absolute;
-  inset: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent-off);
-  transition: background 0.2s;
+.eyes.is-on {
+  color: var(--accent-on);
 }
 
-.card__dot.is-on {
-  background: var(--accent-on);
+.eyes__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.card__dot-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--accent-on);
-  opacity: 0;
+/* The almond outline is always visible (the eye shape). A lid — a rect filled
+   with the card background — covers the iris when idle and lifts up on activate,
+   revealing the eye from the bottom, like an eyelid opening. */
+.eyes__outline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
 }
 
-.card__dot-wrap.is-on::after {
-  animation: ping 1.5s ease-out infinite;
+.eyes__ball {
+  fill: currentColor;
+  stroke: none;
+}
+
+.eyes__pupil {
+  fill: var(--card);
+  stroke: none;
+}
+
+.eyes__lash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+}
+
+.eyes__lid {
+  transform-box: fill-box;
+  transform: translateY(0);
+  transition: transform 0.55s cubic-bezier(0.5, 0, 0.2, 1);
+}
+
+.eyes.is-on .eyes__lid {
+  transform: translateY(-108%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyes__lid,
+  .eyes {
+    transition: none;
+  }
 }
 
 @keyframes ping {
@@ -417,6 +443,13 @@ fieldset.duration-picker[hidden] {
 
 .top-controls__btn[hidden] {
   display: none;
+}
+
+.lang-toggle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-decoration: none;
 }
 
 .top-controls__btn:disabled {

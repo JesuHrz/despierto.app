@@ -1,21 +1,40 @@
-# Config de Netlify para Despierto — sitio estático, sin build.
+# Config de Netlify para Despierto — sitio Astro (build estático).
 
 [build]
-  publish = "src"
+  command = "npm run build"
+  publish = "dist"
+
+# Activa Google Analytics SOLO en el deploy de producción (lo lee Layout.astro).
+# En [context.production] y no en [build.environment] para que los deploy
+# previews y branch deploys no carguen GA.
+[context.production.environment]
+  ENV = "production"
 
 # ---------- Redirects ----------
-# /index.html -> / (URL limpia). force = true equivale al "!" de _redirects.
+# URLs limpias: /index.html -> / y /en/index.html -> /en/.
 [[redirects]]
   from = "/index.html"
   to = "/"
   status = 301
   force = true
 
-# Cualquier ruta desconocida -> raíz. Sin force: los archivos reales
-# (styles.css, script.js, icon.svg, og-image.svg) se sirven primero.
-# El destino tiene que ser /index.html y no /: con "to = /" la regla se matchea a sí
-# misma (/* incluye /) y el motor de redirects la ignora en runtime, sin reportar error
-# en el deploy. La regla de arriba se encarga de dejar la URL final en /.
+[[redirects]]
+  from = "/en/index.html"
+  to = "/en/"
+  status = 301
+  force = true
+
+# 404 con idioma: una ruta desconocida bajo /en vuelve a /en; el resto vuelve a /.
+# La regla /en/* va ANTES del catch-all /*: Netlify evalúa en orden y la primera
+# coincidencia gana. Sin force, los archivos reales (/, /en/, /_astro/*, íconos)
+# se sirven primero. El destino apunta al .html y no al directorio para que la
+# regla no se matchee a sí misma (el motor ignoraría una regla auto-referencial);
+# las reglas force de arriba dejan la URL final limpia.
+[[redirects]]
+  from = "/en/*"
+  to = "/en/index.html"
+  status = 301
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -28,9 +47,18 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Solo se desactivan features NO usadas. Wake Lock y autoplay quedan en su default
-    # (self) para no romper la app.
+    # Solo se desactivan features NO usadas. Wake Lock y autoplay quedan en su
+    # default (self) para no romper la app.
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    # Assets sin hash en el nombre: revalidar siempre (ETag -> 304) para que un
-    # redeploy con el mismo filename no sirva versiones viejas del cache del browser.
+
+# Assets con hash en el nombre (Astro los versiona): cache inmutable de 1 año.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML sin hash: revalidar siempre (ETag -> 304) para no servir versiones viejas.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"

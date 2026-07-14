@@ -1,0 +1,12 @@
+---
+import type { Dict } from "@/libs/i18n/es";
+interface Props {
+  t: Dict;
+}
+const { t } = Astro.props;
+---
+
+<footer class="footer">
+  {t.footer.madeWith} <span class="footer__heart" aria-hidden="true">&hearts;</span> {t.footer.by}{" "}
+  <a class="footer__link" href="https://jesuhrz.com" target="_blank" rel="noopener">jesuhrz</a>
+</footer>

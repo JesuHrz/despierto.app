@@ -1,0 +1,28 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Alert from "@/components/Alert.astro";
+import TopControls from "@/components/TopControls.astro";
+import Card from "@/components/Card.astro";
+import HistoryFeed from "@/components/HistoryFeed.astro";
+import HistoryModal from "@/components/HistoryModal.astro";
+import GuideDialog from "@/components/GuideDialog.astro";
+import Footer from "@/components/Footer.astro";
+import PipOverlay from "@/components/PipOverlay.astro";
+import PipStage from "@/components/PipStage.astro";
+import { getDict } from "@/libs/i18n/ui";
+
+const lang = "es" as const;
+const t = getDict(lang);
+---
+
+<Layout lang={lang}>
+  <Alert t={t} />
+  <TopControls t={t} lang={lang} />
+  <Card t={t} />
+  <HistoryFeed t={t} />
+  <HistoryModal t={t} />
+  <GuideDialog t={t} />
+  <Footer t={t} />
+  <PipOverlay t={t} />
+  <PipStage />
+</Layout>

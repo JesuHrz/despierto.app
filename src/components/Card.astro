@@ -1,0 +1,69 @@
+---
+import type { Dict } from "@/libs/i18n/es";
+interface Props {
+  t: Dict;
+}
+const { t } = Astro.props;
+---
+
+<main class="card">
+  <div class="eyes js-status-eyes" aria-hidden="true">
+    <svg class="eyes__svg" viewBox="0 0 72 34" stroke-linecap="round" stroke-linejoin="round">
+      <defs>
+        <clipPath id="eye-left"><path d="M4 17 Q18 4 32 17 Q18 30 4 17 Z"></path></clipPath>
+        <clipPath id="eye-right"><path d="M40 17 Q54 4 68 17 Q54 30 40 17 Z"></path></clipPath>
+      </defs>
+      <g clip-path="url(#eye-left)">
+        <path class="eyes__ball" d="M4 17 Q18 4 32 17 Q18 30 4 17 Z"></path>
+        <circle class="eyes__pupil" cx="18" cy="17" r="4"></circle>
+        <g class="eyes__lid">
+          <rect x="1" y="-9" width="34" height="32" fill="var(--card)"></rect>
+          <path class="eyes__lash" d="M3 23 Q18 30 33 23"></path>
+        </g>
+      </g>
+      <g clip-path="url(#eye-right)">
+        <path class="eyes__ball" d="M40 17 Q54 4 68 17 Q54 30 40 17 Z"></path>
+        <circle class="eyes__pupil" cx="54" cy="17" r="4"></circle>
+        <g class="eyes__lid">
+          <rect x="37" y="-9" width="34" height="32" fill="var(--card)"></rect>
+          <path class="eyes__lash" d="M39 23 Q54 30 69 23"></path>
+        </g>
+      </g>
+      <path class="eyes__outline" d="M4 17 Q18 4 32 17 Q18 30 4 17 Z"></path>
+      <path class="eyes__outline" d="M40 17 Q54 4 68 17 Q54 30 40 17 Z"></path>
+    </svg>
+  </div>
+  <h1>Despierto</h1>
+  <p class="card__subtitle">{t.card.subtitle}</p>
+
+  <div class="tabs" role="tablist" aria-label={t.card.tablistLabel}>
+    <button type="button" class="tabs__btn is-active js-tab-stopwatch" id="tabStopwatch" role="tab" aria-selected="true" aria-controls="panelStopwatch">{t.card.tabStopwatch}</button>
+    <button type="button" class="tabs__btn js-tab-timer" id="tabTimer" role="tab" aria-selected="false" aria-controls="panelTimer" tabindex="-1">{t.card.tabTimer}</button>
+  </div>
+
+  <div class="card__timer js-timer" aria-hidden="true">00:00:00</div>
+  <div class="card__remaining js-remaining" aria-hidden="true"></div>
+
+  <div id="panelStopwatch" role="tabpanel" aria-labelledby="tabStopwatch"></div>
+
+  <fieldset id="panelTimer" class="duration-picker js-panel-timer" role="tabpanel" aria-labelledby="tabTimer" hidden>
+    <legend class="sr-only">{t.duration.legend}</legend>
+    <div class="duration-picker__presets" role="group" aria-label={t.duration.presetsLabel}>
+      <button type="button" class="duration-picker__btn js-duration-btn" data-minutes="15" aria-pressed="false">15m</button>
+      <button type="button" class="duration-picker__btn js-duration-btn is-active" data-minutes="30" aria-pressed="true">30m</button>
+      <button type="button" class="duration-picker__btn js-duration-btn" data-minutes="45" aria-pressed="false">45m</button>
+    </div>
+    <div class="duration-picker__divider">{t.duration.divider}</div>
+    <div class="duration-picker__field">
+      <label class="duration-picker__custom-label" for="customDuration">{t.duration.customLabel}</label>
+      <input type="text" class="duration-picker__custom-input js-duration-custom-input" id="customDuration" inputmode="decimal" placeholder={t.duration.placeholder} aria-describedby="durationHint" />
+      <p class="duration-picker__hint" id="durationHint" set:html={t.duration.hint}></p>
+    </div>
+    <p class="duration-picker__selected js-duration-selected">{t.duration.selectedDefault}</p>
+  </fieldset>
+
+  <button class="card__toggle js-toggle-button" aria-pressed="false">{t.client.activate}</button>
+  <p class="card__status js-status-message" role="status" aria-live="polite"></p>
+
+  <button type="button" class="history-link js-history-open" aria-haspopup="dialog" hidden>{t.history.open}</button>
+</main>

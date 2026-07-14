@@ -1,6 +1,6 @@
 # Despierto
 
-Evita que tu computadora bloquee la pantalla o entre en reposo mientras la pestaña está abierta. App web **vanilla** (HTML/CSS/JS en `src/`), **sin build**. El código de producción no tiene dependencias; `live-server` es la única dependencia de desarrollo.
+Evita que tu computadora bloquee la pantalla o entre en reposo mientras la pestaña está abierta. Sitio estático hecho con **[Astro](https://astro.build)**, en español e inglés. La lógica de cliente es JavaScript vanilla sin dependencias de runtime; Astro solo se usa para el build y el i18n.
 
 ## Propósito
 
@@ -77,35 +77,46 @@ Si aparece un `NoDisplaySleepAssertion`, la pantalla no se va a bloquear. Si no 
 - **HTTPS** (o `localhost`): la Wake Lock API solo corre en contexto seguro.
 - Para el modo segundo plano, un navegador con **Picture-in-Picture de video** (Chromium: Chrome, Edge, Brave, Arc).
 
+## Idiomas
+
+La app está en español (`/`) e inglés (`/en/`), como páginas estáticas separadas — cada una con su propio HTML, metadata, JSON-LD y `hreflang`, para que Google indexe ambas. El texto vive en diccionarios (`src/i18n/es.ts`, `en.ts`); el markup usa un solo juego de componentes `.astro` parametrizados. Los strings que necesita el JavaScript de cliente se inyectan en `window.__I18N` por idioma.
+
+Agregar un idioma: crear `src/i18n/<lang>.ts`, sumarlo a `src/libs/i18n/ui.ts` y crear `src/pages/<lang>/index.astro`.
+
 ## Analítica
 
-Google Analytics 4 se carga **solo en `despierto.app`**. En `localhost`, en los deploy previews de Netlify o en cualquier otro host, el script no se descarga y `window.gtag` no existe: `track()` queda en no-op. El gate es un chequeo de `location.hostname` en `index.html` — sin build ni variables de entorno, que no existen en una app sin bundler.
+Google Analytics 4 se carga **solo si el build corre con `ENV=production`** (definido en `netlify.toml`). En local (`npm run build` o `npm run dev`) la variable no está y el script de GA ni se genera en el HTML: `window.gtag` no existe y `track()` queda en no-op. El gate se evalúa en build (`import.meta.env.ENV` en `Layout.astro`).
 
-Eventos: `session_start` y `session_stop` (con `mode` y duración), `pip_open` (con `source`: botón o automático) y `theme_change` (con el tema destino). Los parámetros necesitan registrarse como *custom dimensions* en GA para verlos en los reportes.
+Eventos: `session_start` y `session_stop` (con `mode` y duración), `pip_open` (con `source`) y `theme_change` (con el tema destino). Los parámetros necesitan registrarse como *custom dimensions* en GA para verlos en los reportes.
 
 ## Desarrollo
 
-No hay build. Instalá las dependencias de desarrollo y levantá el server con recarga automática:
+Proyecto **Astro** (build estático). Instalá y levantá el dev server:
 
 ```bash
 npm install
-npm run dev   # live-server sirviendo src/ (recarga al guardar)
+npm run dev       # http://localhost:4321
+npm run build     # genera dist/ (GA off sin ENV=production)
+npm run preview   # sirve el build de dist/
 ```
-
-Abrí la URL que imprime (típico `http://localhost:8080`). La app de producción es HTML/CSS/JS vanilla sin dependencias; `live-server` es solo para desarrollo.
 
 ## Estructura
 
 ```
 src/
-  index.html            markup + metadata (SEO, Open Graph, JSON-LD)
-  styles.css            estilos + temas (data-theme)
-  script.js             lógica (wake lock, PiP, timer, historial, tema, analítica)
-  icon.svg              ícono (apple-touch-icon)
-  og-image.svg          imagen para compartir en redes
-package.json            scripts de desarrollo (dev = live-server src)
-netlify.toml            deploy (publish = "src", redirects, headers)
-README.md
+  pages/
+    index.astro         ruta /      (español)
+    en/index.astro      ruta /en/   (inglés)
+  layouts/Layout.astro  <head>: metadata, SEO, JSON-LD, anti-FOUC, GA, __I18N
+  components/*.astro     Card, TopControls, GuideDialog, HistoryFeed, …
+  i18n/
+    es.ts, en.ts         diccionarios (UI + SEO + strings de cliente)
+    ui.ts                helper de idioma
+  scripts/app.js         lógica de cliente (wake lock, PiP, timer, historial, tema)
+  styles/global.css      estilos + temas (data-theme)
+public/                  icon.svg, og-image.svg  (servidos en la raíz)
+astro.config.mjs         config i18n (es default en /, en en /en)
+netlify.toml             deploy (build + publish dist, ENV, redirects, headers)
 ```
 
 ## Convenciones de código

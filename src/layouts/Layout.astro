@@ -1,0 +1,124 @@
+---
+import "../styles/global.css";
+import { getDict, type Lang } from "@/libs/i18n/ui";
+import { isProduction, GA_ID } from "@/libs/constants";
+import { abs } from "@/libs/utils";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = getDict(lang);
+
+const esUrl = abs("/");
+const enUrl = abs("/en/");
+const ogImage = abs("/og-image.svg");
+const canonical = lang === "es" ? esUrl : enUrl;
+
+// Default favicon shown to search engines and before JS runs: open eyes
+// (Despierto = awake). app.js swaps it to closed/open based on session state.
+const openEyes =
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>" +
+  "<g fill='none' stroke='#16a34a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>" +
+  "<path d='M1 16 Q8 8 15 16 Q8 24 1 16 Z'/><path d='M17 16 Q24 8 31 16 Q24 24 17 16 Z'/></g>" +
+  "<circle cx='8' cy='16' r='3.4' fill='#16a34a'/><circle cx='24' cy='16' r='3.4' fill='#16a34a'/></svg>";
+
+const faviconHref = "data:image/svg+xml," + encodeURIComponent(openEyes);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Despierto",
+  url: canonical,
+  description: t.meta.jsonldDescription,
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: t.meta.jsonldOs,
+  browserRequirements: t.meta.jsonldBrowser,
+  inLanguage: t.htmlLang,
+  isAccessibleForFree: true,
+  author: {
+    "@type": "Person",
+    name: "Jesús Hernández",
+    url: "https://jesuhrz.com",
+  },
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <meta name="keywords" content={t.meta.keywords} />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Jesús Hernández" />
+    <link rel="author" href="https://jesuhrz.com" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={esUrl} />
+
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Despierto" />
+    <meta property="og:title" content={t.meta.ogTitle} />
+    <meta property="og:description" content={t.meta.ogDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={t.ogLocale} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={t.meta.twitterTitle} />
+    <meta name="twitter:description" content={t.meta.twitterDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="icon" class="js-favicon" type="image/svg+xml" href={faviconHref} />
+
+    {
+      isProduction && (
+        <script is:inline define:vars={{ gaId: GA_ID }}>
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function gtag() {
+            window.dataLayer.push(arguments);
+          };
+          gtag("js", new Date());
+          gtag("config", gaId);
+
+          const tag = document.createElement("script");
+          tag.async = true;
+          tag.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
+          document.head.appendChild(tag);
+        </script>
+      )
+    }
+
+    <script is:inline>
+      try {
+        const th = localStorage.getItem("__@despierto.theme__");
+
+        if (th === "light" || th === "dark") {
+          document.documentElement.setAttribute("data-theme", th);
+        }
+      } catch (e) {}
+    </script>
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <slot />
+    <script is:inline define:vars={{ i18n: t.client, dateLocale: t.dateLocale }}>
+      window.__I18N = i18n;
+      window.__DATE_LOCALE = dateLocale;
+    </script>
+    <script src="../scripts/app.js"></script>
+  </body>
+</html>

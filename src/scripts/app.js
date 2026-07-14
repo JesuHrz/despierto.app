@@ -1,8 +1,7 @@
 const btn = document.querySelector(".js-toggle-button");
-const dot = document.querySelector(".js-status-dot");
-const dotWrap = document.querySelector(".js-status-dot-wrap");
+const eyes = document.querySelector(".js-status-eyes");
 const favicon = document.querySelector(".js-favicon");
-const status = document.querySelector(".js-status-message");
+const statusEl = document.querySelector(".js-status-message");
 const timerEl = document.querySelector(".js-timer");
 const remainingEl = document.querySelector(".js-remaining");
 const tabStopwatch = document.querySelector(".js-tab-stopwatch");
@@ -45,6 +44,15 @@ let pipSettled = false;
 const HISTORY_KEY = "__@despierto-store.history__";
 const THEME_KEY = "__@despierto.theme__";
 
+const I18N = window.__I18N || {};
+const DATE_LOCALE = window.__DATE_LOCALE || "es";
+
+function fill(str, vars) {
+  return str.replace(/\{(\w+)\}/g, (_, k) =>
+    vars && vars[k] != null ? vars[k] : "",
+  );
+}
+
 function track(name, params) {
   if (typeof window.gtag === "function") window.gtag("event", name, params);
 }
@@ -57,7 +65,7 @@ function currentTheme() {
 
 function syncThemeToggleLabel() {
   const label =
-    currentTheme() === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
+    currentTheme() === "dark" ? I18N.themeToLight : I18N.themeToDark;
   themeToggle.setAttribute("aria-label", label);
   themeToggle.title = label;
 }
@@ -74,10 +82,20 @@ themeToggle.addEventListener("click", () => {
 
 syncThemeToggleLabel();
 
+const EYES_OPEN =
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>" +
+  "<g fill='none' stroke='#16a34a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>" +
+  "<path d='M1 16 Q8 8 15 16 Q8 24 1 16 Z'/><path d='M17 16 Q24 8 31 16 Q24 24 17 16 Z'/></g>" +
+  "<circle cx='8' cy='16' r='3.4' fill='#16a34a'/><circle cx='24' cy='16' r='3.4' fill='#16a34a'/></svg>";
+
+const EYES_CLOSED =
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>" +
+  "<g fill='none' stroke='#8b8b8f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>" +
+  "<path d='M1 14 Q8 22 15 14'/><path d='M17 14 Q24 22 31 14'/></g></svg>";
+
 function updateFavicon(active) {
-  const color = active ? "%2316a34a" : "%238b8b8f";
-  const svg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='${color}'/%3E%3C/svg%3E`;
-  favicon.href = svg;
+  const svg = active ? EYES_OPEN : EYES_CLOSED;
+  favicon.href = "data:image/svg+xml," + encodeURIComponent(svg);
 }
 
 let wakeLock = null;
@@ -103,9 +121,11 @@ function formatDuration(ms, withMs = false) {
 function formatHM(minutes) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (h && m) return `${h}h ${m}min`;
-  if (h) return `${h}h`;
-  return `${m}min`;
+  const hu = I18N.hUnit;
+  const mu = I18N.minUnit;
+  if (h && m) return `${h}${hu} ${m}${mu}`;
+  if (h) return `${h}${hu}`;
+  return `${m}${mu}`;
 }
 
 function parseDuration(input) {
@@ -144,7 +164,9 @@ durationBtns.forEach((b) => {
     selectedMinutes = minutes;
     customDurationInput.value = "";
     setActiveDurationBtn(minutes);
-    durationSelectedEl.textContent = `Se apagará solo en ${formatHM(selectedMinutes)}`;
+    durationSelectedEl.textContent = fill(I18N.turnsOffIn, {
+      hm: formatHM(selectedMinutes),
+    });
   });
 });
 
@@ -153,10 +175,12 @@ customDurationInput.addEventListener("input", () => {
   if (parsed) {
     selectedMinutes = parsed;
     setActiveDurationBtn("custom");
-    durationSelectedEl.textContent = `Se apagará solo en ${formatHM(parsed)}`;
+    durationSelectedEl.textContent = fill(I18N.turnsOffIn, {
+      hm: formatHM(parsed),
+    });
   } else {
     durationSelectedEl.textContent = customDurationInput.value
-      ? "Formato inválido"
+      ? I18N.invalidFormat
       : "";
   }
 });
@@ -217,7 +241,7 @@ function saveHistory(list) {
 }
 
 function buildHistoryItemHTML(entry, seq) {
-  const date = new Date(entry.start).toLocaleString("es", {
+  const date = new Date(entry.start).toLocaleString(DATE_LOCALE, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -232,7 +256,7 @@ function buildHistoryItemHTML(entry, seq) {
     ? "history-feed__item history-feed__item--timer"
     : "history-feed__item";
 
-  const label = isTimer ? "temporizador" : "cronómetro";
+  const label = isTimer ? I18N.modeTimer : I18N.modeStopwatch;
   const modeTag = `<span class="history-feed__reason">${label}</span>`;
 
   return `
@@ -269,7 +293,7 @@ function renderHistory() {
 }
 
 function clearHistory() {
-  if (confirm("¿Borrar todo el historial?")) {
+  if (confirm(I18N.confirmClear)) {
     saveHistory([]);
     renderHistory();
   }
@@ -319,7 +343,9 @@ function startTimer() {
     if (autoStopAt) {
       const remainingMs = autoStopAt - Date.now();
       remainingEl.textContent =
-        remainingMs > 0 ? `Se apaga en ${formatDuration(remainingMs)}` : "";
+        remainingMs > 0
+          ? fill(I18N.offIn, { time: formatDuration(remainingMs) })
+          : "";
     }
     pipUpdate();
   }, 1000);
@@ -334,18 +360,15 @@ function stopTimer() {
 }
 
 function setUI(active, msg) {
-  dot.classList.toggle("is-on", active);
-  dotWrap.classList.toggle("is-on", active);
+  eyes.classList.toggle("is-on", active);
   updateFavicon(active);
-  btn.textContent = active ? "Desactivar" : "Activar";
+  btn.textContent = active ? I18N.deactivate : I18N.activate;
   btn.setAttribute("aria-pressed", String(active));
-  status.textContent = active ? msg || "" : "Sin actividad";
+  statusEl.textContent = active ? msg || "" : I18N.idle;
   setDurationPickerEnabled(!active);
   setTabsEnabled(!active);
   pipOpenBtn.disabled = !active;
-  pipOpenBtn.title = active
-    ? "Ventana flotante"
-    : "Necesita una sesión activa";
+  pipOpenBtn.title = active ? I18N.pipTitleActive : I18N.pipTitleIdle;
   setMediaSession(active);
   if (!active) stopPipVideo();
   syncPipUi();
@@ -374,7 +397,7 @@ function pipDraw() {
 
   ctx.font = "600 20px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
   ctx.fillStyle = cssVar("--accent-off", "#8b8b8f");
-  ctx.fillText(isTimer ? "TEMPORIZADOR" : "CRONÓMETRO", width / 2, 100);
+  ctx.fillText(isTimer ? I18N.canvasTimer : I18N.canvasStopwatch, width / 2, 100);
 
   ctx.font = "700 62px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
   ctx.fillStyle = cssVar("--fg", "#f5f5f7");
@@ -386,8 +409,11 @@ function pipDraw() {
     ctx.fillStyle = cssVar("--accent-auto", "#d97706");
     ctx.fillText(
       remainingMs > 0
-        ? `Se apaga en ${formatDuration(remainingMs)} · dura ${formatHM(selectedMinutes)}`
-        : "Terminando…",
+        ? fill(I18N.pipMeta, {
+            time: formatDuration(remainingMs),
+            hm: formatHM(selectedMinutes),
+          })
+        : I18N.ending,
       width / 2,
       222,
     );
@@ -441,7 +467,7 @@ async function openPip(source) {
     await pipVideo.requestPictureInPicture();
     track("pip_open", { mode: activeTab, source: source || "auto" });
   } catch (err) {
-    status.textContent = "No se pudo abrir la ventana flotante";
+    statusEl.textContent = I18N.pipFailed;
   }
 
   pipSettled = true;
@@ -506,7 +532,7 @@ function setMediaSession(active) {
 updateFavicon(false);
 renderHistory();
 
-status.textContent = "Sin actividad";
+statusEl.textContent = I18N.idle;
 pipOpenBtn.hidden = !pipSupported;
 
 async function acquireFormalLock() {
@@ -515,11 +541,10 @@ async function acquireFormalLock() {
   try {
     wakeLock = await navigator.wakeLock.request("screen");
 
+    // Only clear the reference; the background status is owned by the
+    // visibilitychange handler, which runs on the same hide event.
     wakeLock.addEventListener("release", () => {
       wakeLock = null;
-      if (userActive && document.visibilityState === "hidden") {
-        status.textContent = "Activo en segundo plano (audio)";
-      }
     });
   } catch (err) {}
 }
@@ -568,7 +593,7 @@ async function startSession() {
       selectedMinutes * 60000,
     );
   }
-  setUI(true, "Pantalla despierta activa");
+  setUI(true, I18N.awakeActive);
   await acquireFormalLock();
   await startPipVideo();
 }
@@ -590,15 +615,15 @@ document.addEventListener("visibilitychange", async () => {
 
   if (document.visibilityState === "visible") {
     await acquireFormalLock();
-    status.textContent = "Pantalla despierta activa";
+    statusEl.textContent = I18N.awakeActive;
     return;
   }
 
-  status.textContent = document.pictureInPictureElement
-    ? "Activo en segundo plano (ventana flotante)"
-    : "Sin ventana flotante: la pantalla puede bloquearse";
+  statusEl.textContent = document.pictureInPictureElement
+    ? I18N.bgWithPip
+    : I18N.bgNoPip;
 });
 
 if (!("wakeLock" in navigator)) {
-  status.textContent = "Wake Lock no soportado en este navegador";
+  statusEl.textContent = I18N.wakeLockUnsupported;
 }

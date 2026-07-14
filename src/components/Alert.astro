@@ -1,0 +1,13 @@
+---
+import type { Dict } from "@/libs/i18n/es";
+interface Props {
+  t: Dict;
+}
+const { t } = Astro.props;
+---
+
+<div class="alert js-pip-alert" role="alert" hidden>
+  <span class="alert__icon" aria-hidden="true">&#9888;</span>
+  <p class="alert__text">{t.alert.text}</p>
+  <button type="button" class="alert__action js-pip-reopen">{t.alert.reopen}</button>
+</div>

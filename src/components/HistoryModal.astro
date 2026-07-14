@@ -1,0 +1,19 @@
+---
+import type { Dict } from "@/libs/i18n/es";
+interface Props {
+  t: Dict;
+}
+const { t } = Astro.props;
+---
+
+<dialog class="history-modal js-history-dialog" aria-labelledby="historyModalTitle">
+  <div class="history-modal__head">
+    <h2 class="history-modal__title" id="historyModalTitle">{t.history.modalTitle}</h2>
+    <button type="button" class="history-modal__close js-history-close" aria-label={t.history.close} title={t.history.close}>&times;</button>
+  </div>
+  <div class="history-modal__body">
+    <button type="button" class="history-modal__clear js-history-clear-modal" hidden>{t.history.clear}</button>
+    <p class="history-feed__empty js-history-modal-empty">{t.history.empty}</p>
+    <ul class="history-feed__list js-history-modal-list"></ul>
+  </div>
+</dialog>

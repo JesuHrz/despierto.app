@@ -1,0 +1,19 @@
+---
+import type { Dict } from "@/libs/i18n/es";
+interface Props {
+  t: Dict;
+}
+const { t } = Astro.props;
+---
+
+<div class="overlay js-pip-overlay" hidden>
+  <div class="overlay__box">
+    <div class="overlay__dot-wrap" aria-hidden="true"><div class="overlay__dot"></div></div>
+    <p class="overlay__title">{t.overlay.title}</p>
+    <p class="overlay__text">{t.overlay.text}</p>
+    <div class="overlay__actions">
+      <button type="button" class="overlay__action js-pip-close">{t.overlay.back}</button>
+      <button type="button" class="overlay__action overlay__action--ghost js-pip-stop">{t.overlay.stop}</button>
+    </div>
+  </div>
+</div>
